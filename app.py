@@ -986,8 +986,9 @@ def todo_delete(tid):
 # Main
 # ---------------------------------------------------------------------------
 
+init_db()
+
 if __name__ == "__main__":
-    init_db()
     print("\n  Health Tracker running at http://localhost:5000\n")
     print("  Features: Water | Meals | Calories | Steps | Habits | Fasting")
     print("  Health:   Kidney | Diabetes | Obesity | Hair Growth | Sugar Cut")
