@@ -37,16 +37,15 @@ def get_db():
 
 def init_db():
     conn = get_db()
-    conn.executescript("""
-    CREATE TABLE IF NOT EXISTS water_log (
+    conn.execute("""CREATE TABLE IF NOT EXISTS water_log (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp   TEXT NOT NULL DEFAULT (datetime('now','localtime')),
         amount_ml   INTEGER NOT NULL DEFAULT 250
-    );
-    CREATE TABLE IF NOT EXISTS meal_log (
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS meal_log (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp   TEXT NOT NULL DEFAULT (datetime('now','localtime')),
-        meal_type   TEXT NOT NULL,  -- breakfast, lunch, dinner, snack
+        meal_type   TEXT NOT NULL,
         food_name   TEXT NOT NULL,
         quantity    REAL NOT NULL DEFAULT 1.0,
         unit        TEXT NOT NULL DEFAULT 'serving',
@@ -56,22 +55,22 @@ def init_db():
         fat_g       REAL NOT NULL DEFAULT 0,
         sodium_mg   REAL NOT NULL DEFAULT 0,
         potassium_mg REAL NOT NULL DEFAULT 0
-    );
-    CREATE TABLE IF NOT EXISTS todo (
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS todo (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         task        TEXT NOT NULL,
         done        INTEGER NOT NULL DEFAULT 0,
         priority    TEXT NOT NULL DEFAULT 'medium',
         created     TEXT NOT NULL DEFAULT (datetime('now','localtime')),
         due_date    TEXT DEFAULT NULL
-    );
-    CREATE TABLE IF NOT EXISTS expense_log (
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS expense_log (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         timestamp   TEXT NOT NULL DEFAULT (datetime('now','localtime')),
         amount      REAL NOT NULL,
         note        TEXT DEFAULT ''
-    );
-    CREATE TABLE IF NOT EXISTS pantry (
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS pantry (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         item_name   TEXT NOT NULL UNIQUE,
         quantity    INTEGER NOT NULL DEFAULT 0,
@@ -80,22 +79,22 @@ def init_db():
         low_stock   INTEGER NOT NULL DEFAULT 2,
         added_date  TEXT NOT NULL DEFAULT (date('now','localtime')),
         updated     TEXT NOT NULL DEFAULT (datetime('now','localtime'))
-    );
-    CREATE TABLE IF NOT EXISTS habit_log (
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS habit_log (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         date        TEXT NOT NULL,
         habit_name  TEXT NOT NULL,
         done        INTEGER NOT NULL DEFAULT 0,
         note        TEXT DEFAULT '',
         UNIQUE(date, habit_name)
-    );
-    CREATE TABLE IF NOT EXISTS step_log (
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS step_log (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         date        TEXT NOT NULL,
         steps       INTEGER NOT NULL DEFAULT 0,
         UNIQUE(date)
-    );
-    CREATE TABLE IF NOT EXISTS user_profile (
+    )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS user_profile (
         id              INTEGER PRIMARY KEY CHECK (id = 1),
         weight_kg       REAL NOT NULL DEFAULT 70,
         height_cm       REAL NOT NULL DEFAULT 170,
@@ -106,8 +105,8 @@ def init_db():
         water_goal_ml   INTEGER NOT NULL DEFAULT 2500,
         calorie_goal    INTEGER NOT NULL DEFAULT 2000,
         water_reminder_min INTEGER NOT NULL DEFAULT 60
-    );
-    """)
+    )""")
+    conn.commit()
     # Insert default profile if not exists
     cur = conn.execute("SELECT COUNT(*) FROM user_profile")
     if cur.fetchone()[0] == 0:
