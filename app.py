@@ -22,7 +22,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, f
 app = Flask(__name__)
 app.secret_key = "health-tracker-secret-key-change-me"
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "health.db")
+DB_PATH = os.environ.get("DB_PATH", os.path.join(os.path.dirname(__file__), "health.db"))
 
 # ---------------------------------------------------------------------------
 # Database
