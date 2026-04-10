@@ -74,11 +74,17 @@
                        autocomplete="off" oninput="searchFood(this.value)">
                 <div class="food-dropdown" id="foodDropdown"></div>
             </div>
-            <div><a href="#" onclick="document.getElementById('customFields').classList.toggle('show');return false" style="font-size:0.82em">+ Custom food (not in list)</a></div>
+            <div id="lookupWrap" style="display:none;margin-bottom:10px">
+                <button type="button" id="lookupBtn" class="btn btn-outline btn-sm" onclick="lookupFood()" style="width:100%">
+                    🔍 Search calories online
+                </button>
+                <div id="lookupResults" style="margin-top:8px"></div>
+            </div>
+            <div><a href="#" onclick="document.getElementById('customFields').classList.toggle('show');return false" style="font-size:0.82em">+ Enter nutrition manually</a></div>
             <div class="custom-fields" id="customFields">
-                <div class="row" style="margin:8px 0"><div><label>Calories</label><input name="custom_calories" type="number" placeholder="kcal"></div><div><label>Protein g</label><input name="custom_protein" type="number" value="0"></div></div>
-                <div class="row" style="margin-bottom:8px"><div><label>Carbs g</label><input name="custom_carbs" type="number" value="0"></div><div><label>Fat g</label><input name="custom_fat" type="number" value="0"></div></div>
-                <div class="row" style="margin-bottom:8px"><div><label>Sodium mg</label><input name="custom_sodium" type="number" value="0"></div><div><label>Potassium mg</label><input name="custom_potassium" type="number" value="0"></div></div>
+                <div class="row" style="margin:8px 0"><div><label>Calories (per 100g)</label><input id="cf_cal" name="custom_calories" type="number" placeholder="kcal"></div><div><label>Protein g</label><input id="cf_pro" name="custom_protein" type="number" value="0"></div></div>
+                <div class="row" style="margin-bottom:8px"><div><label>Carbs g</label><input id="cf_carb" name="custom_carbs" type="number" value="0"></div><div><label>Fat g</label><input id="cf_fat" name="custom_fat" type="number" value="0"></div></div>
+                <div class="row" style="margin-bottom:8px"><div><label>Sodium mg</label><input id="cf_sod" name="custom_sodium" type="number" value="0"></div><div><label>Potassium mg</label><input name="custom_potassium" type="number" value="0"></div></div>
             </div>
             <button class="btn btn-red" type="submit" style="width:100%;margin-top:10px">Log Meal</button>
         </form>
@@ -117,15 +123,75 @@
 {% block extra_js %}
 <script>
 const FOODS = {{ foods|tojson }};
+
 function searchFood(q) {
     const dd = document.getElementById('foodDropdown');
-    if (q.length < 1) { dd.classList.remove('show'); return; }
-    q = q.toLowerCase();
-    const matches = FOODS.filter(f => f.includes(q)).slice(0, 10);
-    if (!matches.length) { dd.classList.remove('show'); return; }
-    dd.innerHTML = matches.map(f => `<div class="food-option" onclick="document.getElementById('foodSearch').value='${f}';document.getElementById('foodDropdown').classList.remove('show')">${f}</div>`).join('');
-    dd.classList.add('show');
+    const lw = document.getElementById('lookupWrap');
+    const lr = document.getElementById('lookupResults');
+    if (q.length < 1) { dd.classList.remove('show'); lw.style.display='none'; return; }
+    const ql = q.toLowerCase();
+    const matches = FOODS.filter(f => f.includes(ql)).slice(0, 10);
+    if (matches.length) {
+        dd.innerHTML = matches.map(f => `<div class="food-option" onclick="selectFood('${f}')">${f}</div>`).join('');
+        dd.classList.add('show');
+        lw.style.display = 'none';
+    } else {
+        dd.classList.remove('show');
+        lw.style.display = 'block';
+        lr.innerHTML = '';
+    }
 }
-document.addEventListener('click', e => { if (!e.target.closest('.food-search-wrap')) document.getElementById('foodDropdown').classList.remove('show'); });
+
+function selectFood(f) {
+    document.getElementById('foodSearch').value = f;
+    document.getElementById('foodDropdown').classList.remove('show');
+    document.getElementById('lookupWrap').style.display = 'none';
+}
+
+async function lookupFood() {
+    const q = document.getElementById('foodSearch').value.trim();
+    if (!q) return;
+    const btn = document.getElementById('lookupBtn');
+    const lr  = document.getElementById('lookupResults');
+    btn.textContent = '⏳ Searching...';
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/food-lookup?q=' + encodeURIComponent(q));
+        const data = await res.json();
+        if (!data.results || !data.results.length) {
+            lr.innerHTML = '<div style="font-size:0.82em;color:var(--text3);text-align:center;padding:8px">No results found — enter manually below</div>';
+        } else {
+            lr.innerHTML = data.results.map((r,i) => `
+                <div onclick="fillNutrition(${i})" style="cursor:pointer;padding:10px 12px;background:var(--surface2);border-radius:10px;margin-bottom:6px;border:1px solid var(--border);transition:all .2s" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor='var(--border)'">
+                    <div style="font-size:0.88em;font-weight:600;color:var(--text)">${r.name}</div>
+                    <div style="font-size:0.76em;color:var(--text3);margin-top:3px">
+                        <span style="color:var(--purple);font-weight:700">${r.calories} kcal</span> /100g &nbsp;·&nbsp;
+                        P: ${r.protein}g &nbsp;·&nbsp; C: ${r.carbs}g &nbsp;·&nbsp; F: ${r.fat}g
+                    </div>
+                </div>`).join('');
+            window._lookupResults = data.results;
+        }
+    } catch(e) {
+        lr.innerHTML = '<div style="font-size:0.82em;color:var(--red)">Error — enter manually below</div>';
+    }
+    btn.textContent = '🔍 Search calories online';
+    btn.disabled = false;
+}
+
+function fillNutrition(i) {
+    const r = window._lookupResults[i];
+    document.getElementById('foodSearch').value = r.name;
+    document.getElementById('cf_cal').value  = r.calories;
+    document.getElementById('cf_pro').value  = r.protein;
+    document.getElementById('cf_carb').value = r.carbs;
+    document.getElementById('cf_fat').value  = r.fat;
+    document.getElementById('cf_sod').value  = r.sodium;
+    document.getElementById('customFields').classList.add('show');
+    document.getElementById('lookupResults').innerHTML = '<div style="font-size:0.82em;color:var(--green);padding:6px">✅ Filled! Check values and log.</div>';
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('.food-search-wrap')) document.getElementById('foodDropdown').classList.remove('show');
+});
 </script>
 {% endblock %}

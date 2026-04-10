@@ -16,6 +16,7 @@ Run:
 """
 
 import os, json, sqlite3, math, random
+import urllib.request, urllib.parse
 from datetime import datetime, date, timedelta
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 
@@ -657,6 +658,40 @@ def water_page():
     return render_template("water.html", s=summary, active_page="water")
 
 
+@app.route("/api/food-lookup")
+def food_lookup():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify({"error": "no query"})
+    try:
+        url = "https://world.openfoodfacts.org/cgi/search.pl?" + urllib.parse.urlencode({
+            "search_terms": q, "search_simple": 1, "action": "process",
+            "json": 1, "page_size": 5,
+            "fields": "product_name,nutriments,serving_size"
+        })
+        req = urllib.request.Request(url, headers={"User-Agent": "GlowShine/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read())
+        results = []
+        for p in data.get("products", []):
+            n = p.get("nutriments", {})
+            kcal = n.get("energy-kcal_100g") or n.get("energy_100g", 0)
+            if kcal:
+                try: kcal = float(kcal)
+                except: continue
+                results.append({
+                    "name": p.get("product_name", q),
+                    "calories": round(kcal),
+                    "protein":  round(float(n.get("proteins_100g", 0) or 0), 1),
+                    "carbs":    round(float(n.get("carbohydrates_100g", 0) or 0), 1),
+                    "fat":      round(float(n.get("fat_100g", 0) or 0), 1),
+                    "sodium":   round(float(n.get("sodium_100g", 0) or 0) * 1000, 0),
+                })
+        return jsonify({"results": results[:5]})
+    except Exception as e:
+        return jsonify({"error": str(e), "results": []})
+
+
 @app.route("/meals")
 def meals_page():
     conn = get_db()
@@ -688,22 +723,7 @@ def more_page():
 # Habits / Daily Routines
 # ---------------------------------------------------------------------------
 
-DEFAULT_HABITS = [
-    ("Apply hair oil & scalp massage", "hair"),
-    ("Apply rosemary spray to hair", "hair"),
-    ("Eat eggs (evening)", "nutrition"),
-    ("Eat dal / lentils", "nutrition"),
-    ("Eat fruits (apple/amla/berries)", "nutrition"),
-    ("Eat nuts (almonds/walnuts)", "nutrition"),
-    ("Drink green tea", "health"),
-    ("Walk after meals (15 min)", "fitness"),
-    ("Morning exercise (30 min)", "fitness"),
-    ("No sugar today", "sugar_cut"),
-    ("Drink warm lemon water (morning)", "health"),
-    ("Turmeric milk (evening)", "health"),
-    ("Soaked methi seeds (morning)", "health"),
-    ("Sleep by 10 PM", "health"),
-]
+DEFAULT_HABITS = []
 
 
 @app.route("/habits")
