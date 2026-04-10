@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Fasting — Health Tracker{% endblock %}
+{% block extra_css %}
+<style>
+.fast-time { font-size: 3.5em; font-weight: 700; font-family: 'SF Mono', monospace; color: var(--red); text-align: center; margin: 16px 0 6px; }
+.fast-status { text-align: center; font-size: 0.9em; color: var(--text2); margin-bottom: 16px; }
+.fast-btns { display: flex; gap: 10px; justify-content: center; }
+.phase-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 16px 0 8px; }
+.phase-bar span { transition: flex .3s; }
+.phase-labels { display: flex; justify-content: space-between; font-size: 0.72em; color: var(--text3); }
+</style>
+{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Intermittent Fasting</h1>
+</div>
+<div class="container">
+    <div class="card">
+        <div style="text-align:center;margin-bottom:8px">
+            <svg width="60" height="60" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="58" rx="28" ry="32" fill="white" stroke="#E5E5EA" stroke-width="1"/>
+                <ellipse cx="50" cy="28" rx="20" ry="15" fill="white" stroke="#E5E5EA" stroke-width="1"/>
+                <circle cx="43" cy="27" r="2.5" fill="#2C2C2E"/>
+                <circle cx="57" cy="27" r="2.5" fill="#2C2C2E"/>
+                <line x1="45.5" y1="27" x2="54.5" y2="27" stroke="#2C2C2E" stroke-width="1.2"/>
+            </svg>
+        </div>
+        <div class="fast-time" id="fastTime">00:00:00</div>
+        <div class="fast-status" id="fastStatus">Not fasting. Tap Start when ready.</div>
+
+        <div class="phase-bar">
+            <span id="phase1" style="flex:0;background:var(--surface2)"></span>
+            <span id="phase2" style="flex:0;background:var(--yellow)"></span>
+            <span id="phase3" style="flex:0;background:var(--green)"></span>
+        </div>
+        <div class="phase-labels">
+            <span>0h</span><span>8h Fed</span><span>12h Fat Burn</span><span>16h Goal</span>
+        </div>
+
+        <div class="fast-btns">
+            <button class="btn btn-red" id="fastStart" onclick="startFast()">Start Fast</button>
+            <button class="btn btn-danger" id="fastStop" onclick="stopFast()" style="display:none">End Fast</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>16:8 Fasting Plan</h2>
+        <table>
+            <tr><td style="font-weight:600">Eating window</td><td>10:00 AM - 6:00 PM (8 hours)</td></tr>
+            <tr><td style="font-weight:600">Fasting window</td><td>6:00 PM - 10:00 AM (16 hours)</td></tr>
+            <tr><td style="font-weight:600">During fast</td><td>Water, black coffee, green tea only</td></tr>
+            <tr><td style="font-weight:600">Break fast with</td><td>Warm lemon water, then light meal</td></tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Benefits</h2>
+        <div class="tip tip-good">Improves insulin sensitivity — reduces diabetes risk by 30%</div>
+        <div class="tip tip-good">Triggers autophagy — body cleans damaged cells</div>
+        <div class="tip tip-good">Reduces kidney load — less processing during fast</div>
+        <div class="tip tip-good">Fat burning starts at ~12h — real weight loss zone</div>
+        <div class="tip tip-info">Start with 14:10 if 16:8 is too hard. Build up gradually.</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let fastStart = localStorage.getItem('fastStartTime');
+let fastInterval = null;
+
+function updateFastTimer() {
+    if (!fastStart) return;
+    const elapsed = Date.now() - parseInt(fastStart);
+    const h = Math.floor(elapsed / 3600000);
+    const m = Math.floor((elapsed % 3600000) / 60000);
+    const s = Math.floor((elapsed % 60000) / 1000);
+    document.getElementById('fastTime').textContent =
+        `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+    const status = document.getElementById('fastStatus');
+    const pct = Math.min(elapsed / (16 * 3600000) * 100, 100);
+    if (h >= 16) {
+        status.textContent = 'Fast complete! You can eat now. Baymax is proud.';
+        status.style.color = 'var(--green)';
+        document.getElementById('fastTime').style.color = 'var(--green)';
+    } else if (h >= 12) {
+        status.textContent = `Fat-burning zone! ${16-h}h ${60-m}m to go`;
+        status.style.color = 'var(--green)';
+        document.getElementById('fastTime').style.color = 'var(--green)';
+    } else if (h >= 8) {
+        status.textContent = `Sugar reserves depleting... ${16-h}h ${60-m}m to go`;
+        status.style.color = 'var(--yellow)';
+        document.getElementById('fastTime').style.color = 'var(--yellow)';
+    } else {
+        status.textContent = `Fasting... ${16-h}h ${60-m}m to goal`;
+    }
+
+    // Phase bar
+    const p1 = Math.min(h / 8 * 100, 100);
+    const p2 = h >= 8 ? Math.min((h - 8) / 4 * 100, 100) : 0;
+    const p3 = h >= 12 ? Math.min((h - 12) / 4 * 100, 100) : 0;
+    document.getElementById('phase1').style.flex = p1;
+    document.getElementById('phase2').style.flex = p2;
+    document.getElementById('phase3').style.flex = p3;
+}
+
+function startFast() {
+    fastStart = Date.now().toString();
+    localStorage.setItem('fastStartTime', fastStart);
+    document.getElementById('fastStart').style.display = 'none';
+    document.getElementById('fastStop').style.display = '';
+    fastInterval = setInterval(updateFastTimer, 1000);
+    updateFastTimer();
+}
+
+function stopFast() {
+    fastStart = null;
+    localStorage.removeItem('fastStartTime');
+    clearInterval(fastInterval);
+    document.getElementById('fastTime').textContent = '00:00:00';
+    document.getElementById('fastTime').style.color = 'var(--red)';
+    document.getElementById('fastStatus').textContent = 'Not fasting. Tap Start when ready.';
+    document.getElementById('fastStatus').style.color = 'var(--text2)';
+    document.getElementById('fastStart').style.display = '';
+    document.getElementById('fastStop').style.display = 'none';
+    document.getElementById('phase1').style.flex = 0;
+    document.getElementById('phase2').style.flex = 0;
+    document.getElementById('phase3').style.flex = 0;
+}
+
+if (fastStart) {
+    document.getElementById('fastStart').style.display = 'none';
+    document.getElementById('fastStop').style.display = '';
+    fastInterval = setInterval(updateFastTimer, 1000);
+    updateFastTimer();
+}
+</script>
+{% endblock %}

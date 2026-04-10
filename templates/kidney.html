@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Health Guide — Health Tracker{% endblock %}
+{% block extra_css %}
+<style>
+.guide-tabs { display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px; }
+.guide-tab { padding:8px 16px;border-radius:10px;font-size:0.85em;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all .2s; }
+.guide-tab.active,.guide-tab:hover { background:var(--red);color:white;border-color:var(--red); }
+.guide-section { display:none; }
+.guide-section.active { display:block; }
+.good { color:var(--green); }
+.bad { color:var(--red); }
+.warn { color:var(--yellow); }
+ul { padding-left:18px;margin:8px 0; }
+li { margin:5px 0;font-size:0.9em;line-height:1.5; }
+</style>
+{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Health Guide</h1>
+</div>
+<div class="container">
+    <div class="guide-tabs">
+        <div class="guide-tab active" onclick="showGuide('kidney')">Kidney</div>
+        <div class="guide-tab" onclick="showGuide('diabetes')">Diabetes</div>
+        <div class="guide-tab" onclick="showGuide('sugar')">Sugar Cut</div>
+        <div class="guide-tab" onclick="showGuide('hair')">Hair Growth</div>
+        <div class="guide-tab" onclick="showGuide('obesity')">Obesity</div>
+        <div class="guide-tab" onclick="showGuide('routine')">Daily Routine</div>
+    </div>
+
+    <!-- KIDNEY -->
+    <div class="guide-section active" id="sec-kidney">
+        <div class="card">
+            <h2>Kidney Health</h2>
+            <table>
+                <tr><th>Nutrient</th><th>Healthy</th><th>CKD Risk</th></tr>
+                <tr><td>Water</td><td class="good">2.5-3.0 L</td><td class="warn">Ask doctor</td></tr>
+                <tr><td>Sodium</td><td class="good">&lt;2300 mg</td><td class="bad">&lt;1500 mg</td></tr>
+                <tr><td>Potassium</td><td class="good">2600-3400 mg</td><td class="bad">&lt;2000 mg</td></tr>
+                <tr><td>Protein</td><td class="good">0.8 g/kg</td><td class="bad">0.6 g/kg</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Kidney-Friendly Foods</h2>
+            <ul>
+                <li><b>Best:</b> Cabbage, cauliflower, garlic, onions, bell peppers</li>
+                <li><b>Fruits:</b> Apple, berries, grapes, pineapple</li>
+                <li><b>Protein:</b> Egg whites, fish, chicken (small portions)</li>
+            </ul>
+            <h2 style="margin-top:14px">Stone Prevention</h2>
+            <ul>
+                <li>Drink 2.5-3L water + lemon daily</li>
+                <li>Reduce salt (excess sodium = calcium in urine)</li>
+                <li>Limit oxalate: spinach, beets, chocolate, excess tea</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- DIABETES -->
+    <div class="guide-section" id="sec-diabetes">
+        <div class="card">
+            <h2>Diabetes Prevention</h2>
+            <ul>
+                <li><b>Carbs &lt;50-55%</b> of daily calories</li>
+                <li><b>Choose low GI foods</b> (GI &lt; 55)</li>
+                <li><b>Fiber 25-30g/day</b> slows sugar absorption</li>
+                <li><b>No sugary drinks</b> — #1 cause of spikes</li>
+                <li><b>Walk 15 min after meals</b> — reduces glucose by 30%</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h2>GI Guide</h2>
+            <table>
+                <tr><th>Food</th><th>GI</th><th>Rating</th></tr>
+                <tr><td>White rice</td><td>73</td><td class="bad">High</td></tr>
+                <tr><td>Brown rice</td><td>50</td><td class="good">Low</td></tr>
+                <tr><td>Whole wheat roti</td><td>52</td><td class="good">Low</td></tr>
+                <tr><td>Oatmeal</td><td>55</td><td class="good">Low</td></tr>
+                <tr><td>Dal</td><td>28</td><td class="good">Low</td></tr>
+                <tr><td>Sweet potato</td><td>44</td><td class="good">Low</td></tr>
+                <tr><td>Apple</td><td>36</td><td class="good">Low</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Natural Helpers</h2>
+            <ul>
+                <li><b>Fenugreek (methi)</b> — soaked seeds lower fasting glucose</li>
+                <li><b>Cinnamon</b> — 1/2 tsp/day improves insulin sensitivity</li>
+                <li><b>Turmeric</b> — curcumin reduces insulin resistance</li>
+                <li><b>Bitter gourd (karela)</b> — contains plant insulin</li>
+                <li><b>Amla</b> — chromium helps glucose metabolism</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SUGAR CUT -->
+    <div class="guide-section" id="sec-sugar">
+        <div class="card">
+            <h2>Sugar-Free Alternatives</h2>
+            <table>
+                <tr><th>Instead of</th><th>Use</th></tr>
+                <tr><td>White sugar</td><td class="good">Stevia / Monk fruit</td></tr>
+                <tr><td>Sugar in tea</td><td class="good">Jaggery (small) / Cinnamon</td></tr>
+                <tr><td>Chocolate</td><td class="good">Dark chocolate 85%+</td></tr>
+                <tr><td>Ice cream</td><td class="good">Frozen banana blend</td></tr>
+                <tr><td>Soft drinks</td><td class="good">Lemon water / buttermilk</td></tr>
+                <tr><td>Juice</td><td class="good">Whole fruit</td></tr>
+                <tr><td>Sweets</td><td class="good">Dates + nuts</td></tr>
+                <tr><td>Biscuits</td><td class="good">Oat + date bars</td></tr>
+            </table>
+            <div class="tip tip-info" style="margin-top:10px">Cravings peak at day 3-5 then fade. After 2 weeks, fruit tastes sweeter!</div>
+        </div>
+    </div>
+
+    <!-- HAIR -->
+    <div class="guide-section" id="sec-hair">
+        <div class="card">
+            <h2>Foods for Hair Growth</h2>
+            <table>
+                <tr><th>Food</th><th>Nutrient</th><th>Why</th></tr>
+                <tr><td>Eggs</td><td class="good">Biotin + Protein</td><td>Keratin building blocks</td></tr>
+                <tr><td>Spinach</td><td class="good">Iron + Folate</td><td>Oxygen to follicles</td></tr>
+                <tr><td>Walnuts</td><td class="good">Omega-3 + Zinc</td><td>Prevents thinning</td></tr>
+                <tr><td>Amla</td><td class="good">Vitamin C</td><td>Collagen + iron absorption</td></tr>
+                <tr><td>Dal</td><td class="good">Protein + Iron</td><td>Complete hair nutrition</td></tr>
+                <tr><td>Fish</td><td class="good">Omega-3 + Vit D</td><td>Stimulates follicles</td></tr>
+                <tr><td>Sweet potato</td><td class="good">Beta-carotene</td><td>Scalp health</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Daily Checklist</h2>
+            <ul>
+                <li>2+ eggs or 50g+ protein daily</li>
+                <li>1 cup dal/lentils (iron + zinc)</li>
+                <li>Handful of almonds/walnuts</li>
+                <li>1 amla or citrus fruit</li>
+                <li>Green leafy vegetable</li>
+                <li>2.5L+ water</li>
+            </ul>
+            <div class="tip tip-warning" style="margin-top:8px"><b>Hair killers:</b> Excess sugar, crash dieting, dehydration, high sodium, stress</div>
+        </div>
+    </div>
+
+    <!-- OBESITY -->
+    <div class="guide-section" id="sec-obesity">
+        <div class="card">
+            <h2>5 Rules</h2>
+            <ul>
+                <li><b>Calorie deficit:</b> Eat 300-500 kcal less than TDEE</li>
+                <li><b>Protein first:</b> 1g per kg body weight</li>
+                <li><b>Fiber up:</b> 25-30g/day (oats, dal, veggies)</li>
+                <li><b>Move daily:</b> 7000-10000 steps + 20 min activity</li>
+                <li><b>Sleep 7-8h:</b> Poor sleep increases hunger hormones</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h2>Metabolism Boosters</h2>
+            <table>
+                <tr><td>Green tea 2-3 cups</td><td>+3-4% metabolism</td></tr>
+                <tr><td>Cold water before meals</td><td>Reduces intake 13%</td></tr>
+                <tr><td>Protein every meal</td><td>+15-30% thermic effect</td></tr>
+                <tr><td>16:8 fasting</td><td>Insulin sensitivity + fat burn</td></tr>
+                <tr><td>Walk after meals</td><td>-30% blood sugar spike</td></tr>
+            </table>
+            <div class="tip tip-good" style="margin-top:10px"><b>Plate method:</b> 1/2 vegetables | 1/4 protein | 1/4 carbs = ~400 cal meal</div>
+        </div>
+    </div>
+
+    <!-- ROUTINE -->
+    <div class="guide-section" id="sec-routine">
+        <div class="card">
+            <h2>Ideal Daily Routine</h2>
+            <table>
+                <tr><td style="font-weight:600;color:var(--red)">6:00</td><td>Warm water + lemon</td></tr>
+                <tr><td style="font-weight:600;color:var(--red)">6:30</td><td>Walk / exercise 30 min</td></tr>
+                <tr><td style="font-weight:600;color:var(--red)">7:30</td><td>Soaked methi seeds</td></tr>
+                <tr><td style="font-weight:600;color:var(--orange)">8:00</td><td>Breakfast (protein-rich)</td></tr>
+                <tr><td style="font-weight:600;color:var(--orange)">10:00</td><td>Green tea + almonds</td></tr>
+                <tr><td style="font-weight:600;color:var(--green)">12:30</td><td>Lunch (plate method)</td></tr>
+                <tr><td style="font-weight:600;color:var(--green)">3:00</td><td>Buttermilk + fruit</td></tr>
+                <tr><td style="font-weight:600;color:var(--blue)">5:00</td><td>Evening walk 20 min</td></tr>
+                <tr><td style="font-weight:600;color:var(--blue)">7:00</td><td>Light dinner</td></tr>
+                <tr><td style="font-weight:600;color:var(--text3)">9:00</td><td>Turmeric milk</td></tr>
+                <tr><td style="font-weight:600;color:var(--text3)">10:00</td><td>Sleep (7-8 hours)</td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function showGuide(id) {
+    document.querySelectorAll('.guide-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.guide-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sec-' + id).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}Health Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Baymax greeting */
+.baymax-hero {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+}
+.baymax-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, var(--red-light), transparent);
+    border-radius: 50%;
+}
+.baymax-svg-big { margin: 0 auto 12px; }
+.greeting-text { font-size: 1.15em; font-weight: 600; color: var(--text); }
+.greeting-sub { font-size: 0.85em; color: var(--text2); margin-top: 6px; line-height: 1.5; }
+
+/* Health score circle */
+.score-circle { position: relative; width: 90px; height: 90px; margin: 10px auto; }
+.score-circle svg { transform: rotate(-90deg); }
+.score-circle circle { fill: none; stroke-width: 6; }
+.score-circle .bg { stroke: var(--surface2); }
+.score-circle .fg { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+.score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.6em; font-weight: 700; }
+
+/* Menu grid */
+.menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+.menu-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 18px 14px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+}
+.menu-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.menu-icon { font-size: 2em; margin-bottom: 6px; display: block; }
+.menu-label { font-size: 0.88em; font-weight: 600; }
+.menu-sub { font-size: 0.72em; color: var(--text3); margin-top: 3px; }
+.menu-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--red); color: white;
+    font-size: 0.65em; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px;
+}
+
+/* Quick progress bars */
+.quick-bar { margin: 6px 0; }
+.quick-bar .label { display: flex; justify-content: space-between; font-size: 0.78em; color: var(--text2); margin-bottom: 3px; }
+.quick-bar .bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.quick-bar .fill { height: 100%; border-radius: 3px; }
+
+/* Word of day */
+.wod-card { background: var(--surface); border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+.wod-type { font-size: 0.68em; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 4px; }
+.wod-word { font-size: 1.2em; font-weight: 700; }
+.wod-meaning { font-size: 0.84em; color: var(--text2); margin: 3px 0; }
+.wod-example { font-size: 0.8em; color: var(--text3); font-style: italic; background: var(--surface2); padding: 8px 12px; border-radius: 10px; margin-top: 6px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <!-- Baymax Greeting -->
+    <div class="baymax-hero">
+        <svg class="baymax-svg-big" width="80" height="80" viewBox="0 0 100 100">
+            <ellipse cx="50" cy="62" rx="28" ry="32" fill="white" stroke="#E5E5EA" stroke-width="1"/>
+            <ellipse cx="50" cy="28" rx="20" ry="15" fill="white" stroke="#E5E5EA" stroke-width="1"/>
+            <circle cx="43" cy="27" r="2.5" fill="#2C2C2E"/>
+            <circle cx="57" cy="27" r="2.5" fill="#2C2C2E"/>
+            <line x1="45.5" y1="27" x2="54.5" y2="27" stroke="#2C2C2E" stroke-width="1.2"/>
+            <ellipse cx="24" cy="56" rx="7" ry="13" fill="white" stroke="#E5E5EA" stroke-width="1" transform="rotate(12,24,56)"/>
+            <ellipse cx="76" cy="56" rx="7" ry="13" fill="white" stroke="#E5E5EA" stroke-width="1" transform="rotate(-12,76,56)"/>
+            <!-- Red health chip on chest -->
+            <rect x="42" y="48" width="16" height="10" rx="3" fill="#E83A30" opacity="0.9"/>
+            <line x1="46" y1="53" x2="54" y2="53" stroke="white" stroke-width="1"/>
+            <line x1="50" y1="50" x2="50" y2="56" stroke="white" stroke-width="1"/>
+        </svg>
+        <div class="greeting-text">Hello. I am Baymax, your health companion.</div>
+        <div class="greeting-sub">
+            {% if s.total_water_ml < s.profile.water_goal_ml * 0.3 and s.total_cal == 0 %}
+                "I cannot deactivate until you say you are satisfied with your care."
+            {% elif s.total_water_ml < s.profile.water_goal_ml * 0.5 %}
+                "On a scale of 1 to 10, how would you rate your hydration? Let's drink some water."
+            {% elif s.habits_done < s.habits_total // 2 %}
+                "You have completed {{ s.habits_done }} of {{ s.habits_total }} habits. Shall we work on the rest?"
+            {% elif s.total_cal > s.profile.calorie_goal %}
+                "You are {{ "%.0f"|format(s.total_cal - s.profile.calorie_goal) }} calories over. A short walk would help."
+            {% else %}
+                "I am satisfied with your care. You are doing well today."
+            {% endif %}
+        </div>
+
+        <!-- Health Score -->
+        {% set water_score = [((s.total_water_ml / s.profile.water_goal_ml) * 30)|int, 30]|min %}
+        {% set cal_diff = (s.total_cal - s.profile.calorie_goal)|abs %}
+        {% set cal_score = [30 - (cal_diff / s.profile.calorie_goal * 30)|int, 0]|max %}
+        {% set step_pct = s.steps_done / s.steps_recommended if s.steps_recommended > 0 else 0 %}
+        {% set step_score = [(step_pct * 20)|int, 20]|min %}
+        {% set sodium_score = 10 if s.total_sodium <= 2000 else (5 if s.total_sodium <= 2500 else 0) %}
+        {% set total_score = [water_score + cal_score + step_score + sodium_score, 100]|min %}
+        <div class="score-circle">
+            <svg width="90" height="90">
+                <circle class="bg" cx="45" cy="45" r="38"/>
+                <circle class="fg" cx="45" cy="45" r="38"
+                    stroke="{% if total_score >= 70 %}var(--green){% elif total_score >= 40 %}var(--yellow){% else %}var(--red){% endif %}"
+                    stroke-dasharray="239"
+                    stroke-dashoffset="{{ 239 - (239 * total_score / 100) }}"/>
+            </svg>
+            <div class="score-num" style="color:{% if total_score >= 70 %}var(--green){% elif total_score >= 40 %}var(--yellow){% else %}var(--red){% endif %}">{{ total_score }}</div>
+        </div>
+        <div style="font-size:0.78em;color:var(--text3)">Health Score</div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    {% if s.low_stock %}
+    <div class="tip tip-warning" style="margin-bottom:14px">
+        <b>Buy soon:</b>
+        {% for item in s.low_stock %}{{ item.item_name|capitalize }} ({{ item.quantity }} left){% if not loop.last %}, {% endif %}{% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Quick Progress -->
+    <div class="card" style="padding:16px">
+        <div class="quick-bar">
+            <div class="label"><span>Water</span><span>{{ s.total_water_ml }} / {{ s.profile.water_goal_ml }} ml</span></div>
+            <div class="bar"><div class="fill" style="width:{{ [(s.total_water_ml / s.profile.water_goal_ml * 100)|int, 100]|min }}%;background:var(--blue)"></div></div>
+        </div>
+        <div class="quick-bar">
+            <div class="label"><span>Calories</span><span>{{ "%.0f"|format(s.total_cal) }} / {{ s.profile.calorie_goal }} kcal</span></div>
+            <div class="bar"><div class="fill" style="width:{{ [(s.total_cal / s.profile.calorie_goal * 100)|int if s.profile.calorie_goal > 0 else 0, 100]|min }}%;background:{% if s.total_cal > s.profile.calorie_goal %}var(--red){% else %}var(--green){% endif %}"></div></div>
+        </div>
+        <div class="quick-bar">
+            <div class="label"><span>Steps</span><span>{{ "{:,}".format(s.steps_done) }} / {{ "{:,}".format(s.steps_recommended) }}</span></div>
+            <div class="bar"><div class="fill" style="width:{{ [(s.steps_done / s.steps_recommended * 100)|int if s.steps_recommended > 0 else 0, 100]|min }}%;background:var(--orange)"></div></div>
+        </div>
+        <div class="quick-bar">
+            <div class="label"><span>Habits</span><span>{{ s.habits_done }} / {{ s.habits_total }}</span></div>
+            <div class="bar"><div class="fill" style="width:{{ (s.habits_done / s.habits_total * 100)|int if s.habits_total > 0 else 0 }}%;background:var(--red)"></div></div>
+        </div>
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="menu-grid">
+        <a class="menu-card" href="/water">
+            <span class="menu-icon" style="color:var(--blue)">&#128167;</span>
+            <div class="menu-label">Water</div>
+            <div class="menu-sub">{{ s.total_water_ml }} ml today</div>
+        </a>
+        <a class="menu-card" href="/meals">
+            <span class="menu-icon" style="color:var(--orange)">&#127858;</span>
+            <div class="menu-label">Meals</div>
+            <div class="menu-sub">{{ "%.0f"|format(s.total_cal) }} kcal</div>
+        </a>
+        <a class="menu-card" href="/steps">
+            <span class="menu-icon" style="color:var(--green)">&#128694;</span>
+            <div class="menu-label">Steps</div>
+            <div class="menu-sub">{{ "{:,}".format(s.steps_done) }} today</div>
+        </a>
+        <a class="menu-card" href="/fasting">
+            <span class="menu-icon" style="color:var(--red)">&#9201;</span>
+            <div class="menu-label">Fasting</div>
+            <div class="menu-sub">16:8 timer</div>
+        </a>
+        <a class="menu-card" href="/habits">
+            <span class="menu-icon" style="color:var(--red)">&#10004;</span>
+            <div class="menu-label">Habits</div>
+            <div class="menu-sub">{{ s.habits_done }}/{{ s.habits_total }} done</div>
+            {% if s.habits_total - s.habits_done > 0 %}
+            <span class="menu-badge">{{ s.habits_total - s.habits_done }}</span>
+            {% endif %}
+        </a>
+        <a class="menu-card" href="/pantry">
+            <span class="menu-icon" style="color:var(--green)">&#127823;</span>
+            <div class="menu-label">Pantry</div>
+            <div class="menu-sub">Fruit inventory</div>
+            {% if s.low_stock %}
+            <span class="menu-badge">{{ s.low_stock|length }}</span>
+            {% endif %}
+        </a>
+        <a class="menu-card" href="/expenses">
+            <span class="menu-icon" style="color:var(--yellow)">&#8377;</span>
+            <div class="menu-label">Expenses</div>
+            <div class="menu-sub">{{ "%.0f"|format(s.today_expenses) }} today</div>
+        </a>
+        <a class="menu-card" href="/todos">
+            <span class="menu-icon" style="color:var(--orange)">&#128221;</span>
+            <div class="menu-label">To-Do</div>
+            <div class="menu-sub">{{ s.pending_todos }} pending</div>
+            {% if s.pending_todos > 0 %}
+            <span class="menu-badge">{{ s.pending_todos }}</span>
+            {% endif %}
+        </a>
+        <a class="menu-card" href="/kidney">
+            <span class="menu-icon" style="color:var(--red)">&#10084;</span>
+            <div class="menu-label">Health Guide</div>
+            <div class="menu-sub">Kidney, diabetes, hair</div>
+        </a>
+        <a class="menu-card" href="/history">
+            <span class="menu-icon" style="color:var(--text3)">&#128197;</span>
+            <div class="menu-label">History</div>
+            <div class="menu-sub">30-day log</div>
+        </a>
+        <a class="menu-card" href="/profile">
+            <span class="menu-icon" style="color:var(--text2)">&#9881;</span>
+            <div class="menu-label">Profile</div>
+            <div class="menu-sub">
+                {% set bmi = s.profile.weight_kg / (s.profile.height_cm / 100) ** 2 %}
+                BMI {{ "%.1f"|format(bmi) }}
+            </div>
+        </a>
+    </div>
+
+    <!-- Word of the Day -->
+    <div class="wod-card">
+        <div style="display:flex;gap:14px">
+            <div style="flex:1">
+                <div class="wod-type" style="color:var(--red)">Office Word</div>
+                <div class="wod-word" style="color:var(--red)">{{ pro_word.word }}</div>
+                <div class="wod-meaning">{{ pro_word.meaning }}</div>
+                <div class="wod-example">"{{ pro_word.example }}"</div>
+            </div>
+        </div>
+    </div>
+    <div class="wod-card">
+        <div class="wod-type" style="color:var(--orange)">Gen Z Word</div>
+        <div class="wod-word" style="color:var(--orange)">{{ gen_word.word }}</div>
+        <div class="wod-meaning">{{ gen_word.meaning }}</div>
+        <div class="wod-example">"{{ gen_word.example }}"</div>
+    </div>
+
+    <!-- Kidney tips -->
+    {% for level, msg in s.kidney_tips %}
+    <div class="tip tip-{{ level }}">{{ msg }}</div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Meals — Health Tracker{% endblock %}
+{% block extra_css %}
+<style>
+.food-search-wrap { position: relative; }
+.food-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; max-height: 200px; overflow-y: auto; z-index: 10; display: none; box-shadow: var(--shadow-lg); }
+.food-dropdown.show { display: block; }
+.food-option { padding: 12px 14px; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid var(--surface2); }
+.food-option:hover { background: var(--surface2); }
+.food-option:last-child { border: none; }
+.custom-fields { display: none; margin-top: 10px; }
+.custom-fields.show { display: block; }
+.meal-type-badge { font-size: 0.72em; padding: 3px 10px; border-radius: 6px; color: white; font-weight: 600; text-transform: uppercase; }
+.mt-breakfast { background: var(--orange); }
+.mt-lunch { background: var(--green); }
+.mt-dinner { background: var(--blue); }
+.mt-snack { background: var(--yellow); }
+.macro-row { display: flex; gap: 8px; margin: 10px 0; text-align: center; }
+.macro-box { flex: 1; padding: 10px; background: var(--surface2); border-radius: 10px; }
+.macro-box .val { font-size: 1.2em; font-weight: 700; }
+.macro-box .lbl { font-size: 0.72em; color: var(--text3); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Meals & Calories</h1>
+</div>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <!-- Summary -->
+    <div class="card" style="text-align:center">
+        <div style="font-size:2.5em;font-weight:700;color:{% if s.total_cal > s.profile.calorie_goal %}var(--red){% else %}var(--green){% endif %}">{{ "%.0f"|format(s.total_cal) }}</div>
+        <div style="font-size:0.85em;color:var(--text3)">of {{ s.profile.calorie_goal }} kcal goal (TDEE: {{ "%.0f"|format(s.tdee) }})</div>
+        <div class="progress-bar" style="margin:12px 0">
+            <div class="progress-fill" style="width:{{ [(s.total_cal / s.profile.calorie_goal * 100)|int if s.profile.calorie_goal > 0 else 0, 100]|min }}%;background:{% if s.total_cal > s.profile.calorie_goal %}var(--red){% else %}var(--green){% endif %}"></div>
+        </div>
+        <div class="macro-row">
+            <div class="macro-box"><div class="val" style="color:var(--blue)">{{ "%.0f"|format(s.total_protein) }}g</div><div class="lbl">Protein</div></div>
+            <div class="macro-box"><div class="val" style="color:var(--yellow)">{{ "%.0f"|format(s.total_carbs) }}g</div><div class="lbl">Carbs</div></div>
+            <div class="macro-box"><div class="val" style="color:var(--orange)">{{ "%.0f"|format(s.total_fat) }}g</div><div class="lbl">Fat</div></div>
+            <div class="macro-box"><div class="val" style="color:var(--text2)">{{ "%.0f"|format(s.total_sodium) }}</div><div class="lbl">Sodium mg</div></div>
+        </div>
+    </div>
+
+    <!-- Log Meal -->
+    <div class="card">
+        <h2>Log Meal</h2>
+        <form method="POST" action="/meal">
+            <div class="row" style="margin-bottom:10px">
+                <div>
+                    <label>Meal Type</label>
+                    <select name="meal_type">
+                        <option value="breakfast">Breakfast</option>
+                        <option value="lunch">Lunch</option>
+                        <option value="dinner">Dinner</option>
+                        <option value="snack">Snack</option>
+                    </select>
+                </div>
+                <div style="max-width:80px">
+                    <label>Qty</label>
+                    <input name="quantity" type="number" value="1" min="0.25" step="0.25">
+                </div>
+            </div>
+            <div class="food-search-wrap" style="margin-bottom:10px">
+                <label>Food</label>
+                <input name="food_name" id="foodSearch" type="text" placeholder="Type to search... e.g., rice, dosa, egg"
+                       autocomplete="off" oninput="searchFood(this.value)">
+                <div class="food-dropdown" id="foodDropdown"></div>
+            </div>
+            <div><a href="#" onclick="document.getElementById('customFields').classList.toggle('show');return false" style="font-size:0.82em">+ Custom food (not in list)</a></div>
+            <div class="custom-fields" id="customFields">
+                <div class="row" style="margin:8px 0"><div><label>Calories</label><input name="custom_calories" type="number" placeholder="kcal"></div><div><label>Protein g</label><input name="custom_protein" type="number" value="0"></div></div>
+                <div class="row" style="margin-bottom:8px"><div><label>Carbs g</label><input name="custom_carbs" type="number" value="0"></div><div><label>Fat g</label><input name="custom_fat" type="number" value="0"></div></div>
+                <div class="row" style="margin-bottom:8px"><div><label>Sodium mg</label><input name="custom_sodium" type="number" value="0"></div><div><label>Potassium mg</label><input name="custom_potassium" type="number" value="0"></div></div>
+            </div>
+            <button class="btn btn-red" type="submit" style="width:100%;margin-top:10px">Log Meal</button>
+        </form>
+    </div>
+
+    <!-- Today's Meals -->
+    {% for mtype in ['breakfast', 'lunch', 'dinner', 'snack'] %}
+    {% if s.grouped_meals[mtype] %}
+    <div class="card">
+        <h2><span class="meal-type-badge mt-{{ mtype }}">{{ mtype }}</span></h2>
+        {% for m in s.grouped_meals[mtype] %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--surface2)">
+            <span style="flex:1">{{ m.food_name|capitalize }} {% if m.quantity != 1 %}(x{{ m.quantity }}){% endif %}</span>
+            <span style="font-weight:600;color:var(--orange);margin-right:8px">{{ "%.0f"|format(m.calories * m.quantity) }}</span>
+            <form method="POST" action="/meal/delete/{{ m.id }}" style="margin:0">
+                <button class="btn btn-danger btn-sm" type="submit">&times;</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% if not s.meals %}
+    <div class="card" style="text-align:center;color:var(--text3);padding:30px">No meals logged yet today</div>
+    {% endif %}
+
+    {% if s.total_cal > 0 %}
+    {% set carb_pct = (s.total_carbs * 4 / s.total_cal * 100) if s.total_cal > 0 else 0 %}
+    {% if carb_pct > 55 %}
+    <div class="tip tip-caution">Carbs are {{ "%.0f"|format(carb_pct) }}% of calories. For diabetes prevention, aim for &lt;50-55% and choose whole grains.</div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const FOODS = {{ foods|tojson }};
+function searchFood(q) {
+    const dd = document.getElementById('foodDropdown');
+    if (q.length < 1) { dd.classList.remove('show'); return; }
+    q = q.toLowerCase();
+    const matches = FOODS.filter(f => f.includes(q)).slice(0, 10);
+    if (!matches.length) { dd.classList.remove('show'); return; }
+    dd.innerHTML = matches.map(f => `<div class="food-option" onclick="document.getElementById('foodSearch').value='${f}';document.getElementById('foodDropdown').classList.remove('show')">${f}</div>`).join('');
+    dd.classList.add('show');
+}
+document.addEventListener('click', e => { if (!e.target.closest('.food-search-wrap')) document.getElementById('foodDropdown').classList.remove('show'); });
+</script>
+{% endblock %}

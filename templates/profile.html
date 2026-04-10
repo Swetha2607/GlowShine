@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Profile — Health Tracker{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Profile & Settings</h1>
+</div>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    {% set bmi = p.weight_kg / (p.height_cm / 100) ** 2 %}
+    {% set bmr_val = 10 * p.weight_kg + 6.25 * p.height_cm - 5 * p.age + (5 if p.gender == 'male' else -161) %}
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+        <div class="card" style="text-align:center;padding:14px">
+            <div style="font-size:1.8em;font-weight:700;color:{% if bmi < 18.5 %}var(--blue){% elif bmi < 25 %}var(--green){% elif bmi < 30 %}var(--yellow){% else %}var(--red){% endif %}">{{ "%.1f"|format(bmi) }}</div>
+            <div style="font-size:0.78em;color:var(--text3)">BMI ({% if bmi < 18.5 %}Underweight{% elif bmi < 25 %}Normal{% elif bmi < 30 %}Overweight{% else %}Obese{% endif %})</div>
+        </div>
+        <div class="card" style="text-align:center;padding:14px">
+            <div style="font-size:1.8em;font-weight:700;color:var(--orange)">{{ "%.0f"|format(tdee) }}</div>
+            <div style="font-size:0.78em;color:var(--text3)">TDEE kcal/day</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Your Profile</h2>
+        <form method="POST">
+            <div class="row" style="margin-bottom:8px">
+                <div><label>Weight (kg)</label><input name="weight_kg" type="number" step="0.1" value="{{ p.weight_kg }}" required></div>
+                <div><label>Height (cm)</label><input name="height_cm" type="number" step="0.1" value="{{ p.height_cm }}" required></div>
+            </div>
+            <div class="row" style="margin-bottom:8px">
+                <div><label>Age</label><input name="age" type="number" value="{{ p.age }}" required></div>
+                <div><label>Gender</label><select name="gender"><option value="male" {% if p.gender=='male' %}selected{% endif %}>Male</option><option value="female" {% if p.gender=='female' %}selected{% endif %}>Female</option></select></div>
+            </div>
+            <div style="margin-bottom:8px"><label>Activity Level</label>
+            <select name="activity_level">
+                <option value="sedentary" {% if p.activity_level=='sedentary' %}selected{% endif %}>Sedentary (desk job)</option>
+                <option value="light" {% if p.activity_level=='light' %}selected{% endif %}>Light (1-3 days/week)</option>
+                <option value="moderate" {% if p.activity_level=='moderate' %}selected{% endif %}>Moderate (3-5 days/week)</option>
+                <option value="active" {% if p.activity_level=='active' %}selected{% endif %}>Active (6-7 days/week)</option>
+                <option value="very_active" {% if p.activity_level=='very_active' %}selected{% endif %}>Very Active</option>
+            </select></div>
+            <div class="row" style="margin-bottom:8px">
+                <div><label>Water Goal (ml)</label><input name="water_goal_ml" type="number" value="{{ p.water_goal_ml }}" required></div>
+                <div><label>Calorie Goal</label><input name="calorie_goal" type="number" value="{{ p.calorie_goal }}" required></div>
+            </div>
+            <div style="margin-bottom:8px"><label>Water Reminder (min)</label><input name="water_reminder_min" type="number" value="{{ p.water_reminder_min }}" min="15" max="180"></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+                <input type="checkbox" name="kidney_concern" id="kc" {% if p.kidney_concern %}checked{% endif %} style="width:auto">
+                <label for="kc" style="margin:0">Kidney health concern (stricter limits)</label>
+            </div>
+            <button class="btn btn-red" type="submit" style="width:100%">Save Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

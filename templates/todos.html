@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}To-Do — Health Tracker{% endblock %}
+{% block extra_css %}
+<style>
+.todo-item { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface2); }
+.todo-item:last-child { border:none; }
+.todo-check { width:28px;height:28px;border-radius:50%;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:white;font-size:0;transition:all .2s; }
+.todo-check.done { background:var(--green);border-color:var(--green);color:white;font-size:0.9em; }
+.todo-text { flex:1;font-size:0.92em; }
+.todo-text.done { text-decoration:line-through;color:var(--text3); }
+.priority-bar { width:3px;border-radius:2px;align-self:stretch;flex-shrink:0; }
+.p-high { background:var(--red); }
+.p-medium { background:var(--yellow); }
+.p-low { background:var(--green); }
+.p-tag { font-size:0.65em;padding:2px 6px;border-radius:4px;font-weight:600;color:white; }
+.overdue { color:var(--red);font-weight:600; }
+</style>
+{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>To-Do List</h1>
+</div>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="card" style="text-align:center;padding:14px"><div style="font-size:1.8em;font-weight:700;color:var(--orange)">{{ pending|length }}</div><div style="font-size:0.78em;color:var(--text3)">Pending</div></div>
+        <div class="card" style="text-align:center;padding:14px"><div style="font-size:1.8em;font-weight:700;color:var(--green)">{{ completed|length }}</div><div style="font-size:0.78em;color:var(--text3)">Done</div></div>
+    </div>
+
+    <div class="card">
+        <h2>Add Task</h2>
+        <form method="POST" action="/todo/add">
+            <div style="margin-bottom:8px"><input name="task" placeholder="What do you need to do?" required></div>
+            <div class="row">
+                <div><label>Priority</label><select name="priority"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>
+                <div><label>Due (optional)</label><input name="due_date" type="date"></div>
+                <button class="btn btn-red" type="submit" style="margin-bottom:0">Add</button>
+            </div>
+        </form>
+    </div>
+
+    {% if pending %}
+    <div class="card">
+        <h2>Pending</h2>
+        {% for t in pending %}
+        <div class="todo-item">
+            <div class="priority-bar p-{{ t.priority }}"></div>
+            <form method="POST" action="/todo/toggle/{{ t.id }}" style="margin:0"><button type="submit" class="todo-check"></button></form>
+            <div style="flex:1">
+                <div class="todo-text">{{ t.task }}</div>
+                <div style="display:flex;gap:6px;align-items:center;margin-top:3px">
+                    <span class="p-tag" style="background:{% if t.priority=='high' %}var(--red){% elif t.priority=='medium' %}var(--yellow){% else %}var(--green){% endif %}">{{ t.priority|upper }}</span>
+                    {% if t.due_date %}<span style="font-size:0.75em;color:var(--text3)" class="{% if t.due_date < today %}overdue{% endif %}">{{ t.due_date }}{% if t.due_date < today %} OVERDUE{% endif %}</span>{% endif %}
+                </div>
+            </div>
+            <form method="POST" action="/todo/delete/{{ t.id }}" style="margin:0"><button class="btn btn-danger btn-sm" type="submit">&times;</button></form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if completed %}
+    <div class="card">
+        <h2>Done</h2>
+        {% for t in completed %}
+        <div class="todo-item" style="opacity:0.5">
+            <form method="POST" action="/todo/toggle/{{ t.id }}" style="margin:0"><button type="submit" class="todo-check done">&#10003;</button></form>
+            <span class="todo-text done">{{ t.task }}</span>
+            <form method="POST" action="/todo/delete/{{ t.id }}" style="margin:0"><button class="btn btn-danger btn-sm" type="submit">&times;</button></form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

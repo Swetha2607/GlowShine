@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Steps — Health Tracker{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Steps & Activity</h1>
+</div>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <div class="card" style="text-align:center">
+        <div style="font-size:0.85em;color:var(--text3);margin-bottom:4px">Today's Steps</div>
+        <div style="font-size:3em;font-weight:700;color:{% if s.steps_done >= s.steps_recommended %}var(--green){% else %}var(--orange){% endif %}">
+            {{ "{:,}".format(s.steps_done) }}
+        </div>
+        <div style="font-size:0.85em;color:var(--text3)">Goal: {{ "{:,}".format(s.steps_recommended) }}</div>
+        <div class="progress-bar" style="margin:14px 0">
+            <div class="progress-fill" style="width:{{ [(s.steps_done / s.steps_recommended * 100)|int if s.steps_recommended > 0 else 0, 100]|min }}%;background:var(--orange)"></div>
+        </div>
+
+        {% if s.steps_done >= s.steps_recommended %}
+        <div class="tip tip-good">Goal reached! Baymax is satisfied with your activity.</div>
+        {% elif s.excess_calories > 0 %}
+        <div class="tip tip-caution">{{ "%.0f"|format(s.excess_calories) }} excess calories. Walk {{ "{:,}".format(s.steps_recommended - s.steps_done) }} more steps to burn them.</div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Update Steps</h2>
+        <form method="POST" action="/steps" style="display:flex;gap:10px">
+            <input name="steps" type="number" placeholder="Enter today's step count" value="{{ s.steps_done if s.steps_done > 0 else '' }}" min="0" style="flex:1">
+            <button class="btn btn-red" type="submit">Save</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Step Guide</h2>
+        <table>
+            <tr><td style="font-weight:600">5,000</td><td>Minimum for health</td></tr>
+            <tr><td style="font-weight:600;color:var(--green)">7,000</td><td>Recommended for kidney health</td></tr>
+            <tr><td style="font-weight:600;color:var(--green)">10,000</td><td>Ideal (~5 km, burns ~400 kcal)</td></tr>
+            <tr><td style="font-weight:600;color:var(--blue)">12,000+</td><td>Active weight loss</td></tr>
+        </table>
+    </div>
+
+    <div class="tip tip-info">
+        <b>Walk after meals:</b> 15 min post-meal walk reduces blood sugar spike by 30%. Great for diabetes prevention and kidney health.
+    </div>
+</div>
+{% endblock %}

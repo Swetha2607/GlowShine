@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}History — Health Tracker{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>History</h1>
+</div>
+<div class="container">
+    {% if days %}
+    {% for s in days %}
+    <div class="card">
+        <div style="font-weight:600;color:var(--red);margin-bottom:10px">{{ s.date }}</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:0.85em">
+            <div><span style="color:var(--text3)">Water:</span> <b style="color:var(--blue)">{{ s.total_water_ml }}ml</b></div>
+            <div><span style="color:var(--text3)">Cal:</span> <b style="color:var(--orange)">{{ "%.0f"|format(s.total_cal) }}</b></div>
+            <div><span style="color:var(--text3)">Steps:</span> <b style="color:var(--green)">{{ "{:,}".format(s.steps_done) }}</b></div>
+            <div><span style="color:var(--text3)">Protein:</span> <b>{{ "%.0f"|format(s.total_protein) }}g</b></div>
+            <div><span style="color:var(--text3)">Na:</span> <b>{{ "%.0f"|format(s.total_sodium) }}mg</b></div>
+        </div>
+        {% if s.meals %}
+        <div style="font-size:0.8em;color:var(--text3);margin-top:6px">
+            {% for m in s.meals[:5] %}{{ m.food_name|capitalize }}{% if not loop.last %}, {% endif %}{% endfor %}{% if s.meals|length > 5 %} +{{ s.meals|length - 5 }} more{% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="card" style="text-align:center;color:var(--text3);padding:30px">No data yet. Start tracking!</div>
+    {% endif %}
+</div>
+{% endblock %}

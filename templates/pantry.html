@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Pantry — Health Tracker{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Pantry</h1>
+</div>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    {% if low_stock %}
+    <div class="tip tip-warning"><b>Low stock!</b> {% for item in low_stock %}{{ item.item_name|capitalize }} ({{ item.quantity }} left){% if not loop.last %}, {% endif %}{% endfor %}</div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Add Item</h2>
+        <form method="POST" action="/pantry/add">
+            <div class="row" style="margin-bottom:8px">
+                <div style="flex:2"><label>Item</label><input name="item_name" placeholder="e.g., apple, banana..." required></div>
+                <div><label>Qty</label><input name="quantity" type="number" value="5" min="1"></div>
+            </div>
+            <div class="row" style="margin-bottom:10px">
+                <div><label>Unit</label><select name="unit"><option>pieces</option><option>kg</option><option>dozen</option><option>pack</option><option>liters</option></select></div>
+                <div><label>Category</label><select name="category"><option value="fruit">Fruit</option><option value="vegetable">Vegetable</option><option value="dairy">Dairy</option><option value="grain">Grain</option><option value="snack">Snack</option><option value="other">Other</option></select></div>
+                <div><label>Low at</label><input name="low_stock" type="number" value="2" min="0"></div>
+            </div>
+            <button class="btn btn-red" type="submit" style="width:100%">Add to Pantry</button>
+        </form>
+    </div>
+
+    {% if items %}
+    {% set current_cat = '' %}
+    {% for item in items %}
+        {% if item.category != current_cat %}
+            {% if current_cat != '' %}</div>{% endif %}
+            {% set current_cat = item.category %}
+            <div class="card">
+            <h2 style="text-transform:capitalize">{{ item.category }}s</h2>
+        {% endif %}
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--surface2)">
+            <span style="flex:1;font-weight:500">{{ item.item_name|capitalize }}</span>
+            <span style="font-size:1.4em;font-weight:700;min-width:35px;text-align:center;color:{% if item.quantity <= item.low_stock %}var(--red){% else %}var(--green){% endif %}">{{ item.quantity }}</span>
+            <span style="font-size:0.78em;color:var(--text3)">{{ item.unit }}</span>
+            <form method="POST" action="/pantry/eat/{{ item.id }}" style="margin:0"><button class="btn btn-ghost btn-sm" type="submit">-1</button></form>
+            <form method="POST" action="/pantry/add" style="margin:0"><input type="hidden" name="item_name" value="{{ item.item_name }}"><input type="hidden" name="quantity" value="1"><input type="hidden" name="unit" value="{{ item.unit }}"><input type="hidden" name="category" value="{{ item.category }}"><input type="hidden" name="low_stock" value="{{ item.low_stock }}"><button class="btn btn-outline btn-sm" type="submit">+1</button></form>
+            <form method="POST" action="/pantry/delete/{{ item.id }}" style="margin:0"><button class="btn btn-danger btn-sm" type="submit">&times;</button></form>
+        </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center;color:var(--text3);padding:30px">No items yet. Add fruits & groceries above!</div>
+    {% endif %}
+</div>
+{% endblock %}

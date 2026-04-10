@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Water — Health Tracker{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Water Intake</h1>
+</div>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <div class="card" style="text-align:center">
+        <div style="font-size:2.8em;font-weight:700;color:var(--blue)">{{ s.total_water_ml }}</div>
+        <div style="font-size:0.85em;color:var(--text3)">of {{ s.profile.water_goal_ml }} ml goal</div>
+        <div class="progress-bar" style="margin:12px 0">
+            <div class="progress-fill" style="width:{{ [(s.total_water_ml / s.profile.water_goal_ml * 100)|int, 100]|min }}%;background:var(--blue)"></div>
+        </div>
+        {% if s.total_water_ml >= s.profile.water_goal_ml %}
+        <div class="tip tip-good">Goal reached! Great job staying hydrated.</div>
+        {% else %}
+        <div style="font-size:0.85em;color:var(--text2)">{{ s.profile.water_goal_ml - s.total_water_ml }} ml remaining</div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Quick Add</h2>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            {% for amt in [150, 250, 500, 750] %}
+            <form method="POST" action="/water" style="margin:0">
+                <input type="hidden" name="amount" value="{{ amt }}">
+                <button class="btn {% if amt == 250 %}btn-red{% else %}btn-outline{% endif %}" type="submit" style="width:100%;padding:14px 8px">
+                    <div style="font-size:1.3em">&#128167;</div>
+                    {{ amt }}ml
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+        <form method="POST" action="/water" style="display:flex;gap:8px;margin-top:12px">
+            <input name="amount" type="number" placeholder="Custom amount (ml)" min="1" style="flex:1">
+            <button class="btn btn-red" type="submit">Add</button>
+        </form>
+    </div>
+
+    {% if s.water_logs %}
+    <div class="card">
+        <h2>Today's Log</h2>
+        {% for w in s.water_logs %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--surface2)">
+            <span style="color:var(--text3);font-size:0.88em">{{ w.timestamp.split(' ')[1][:5] }}</span>
+            <span style="font-weight:600">{{ w.amount_ml }} ml</span>
+            <form method="POST" action="/water/delete/{{ w.id }}" style="margin:0">
+                <button class="btn btn-danger btn-sm" type="submit">&times;</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="tip tip-info">
+        <b>Kidney health tip:</b> Drink 2.5-3L water daily. Add lemon juice — citrate prevents kidney stones. Spread intake throughout the day.
+    </div>
+</div>
+{% endblock %}

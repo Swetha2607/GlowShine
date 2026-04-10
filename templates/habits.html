@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Habits — Health Tracker{% endblock %}
+{% block extra_css %}
+<style>
+.habit-item { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface2); }
+.habit-item:last-child { border:none; }
+.habit-check { width:30px;height:30px;border-radius:10px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;background:white;font-size:0; }
+.habit-check.done { background:var(--green);border-color:var(--green);color:white;font-size:1em; }
+.habit-check:hover { border-color:var(--green); }
+.habit-name { flex:1;font-size:0.92em; }
+.habit-name.done-text { text-decoration:line-through;color:var(--text3); }
+.habit-streak { font-size:0.78em;color:var(--orange);font-weight:600; }
+.cat-tag { font-size:0.7em;padding:3px 8px;border-radius:6px;font-weight:600;color:white;margin-bottom:10px;display:inline-block; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>Daily Habits</h1>
+</div>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <div class="card" style="text-align:center">
+        <div style="font-size:2.5em;font-weight:700;color:{% if done_count == total %}var(--green){% else %}var(--red){% endif %}">{{ done_count }}/{{ total }}</div>
+        <div style="font-size:0.85em;color:var(--text3)">habits completed today</div>
+        <div class="progress-bar" style="margin:10px 0">
+            <div class="progress-fill" style="width:{{ (done_count / total * 100)|int if total > 0 else 0 }}%;background:var(--red)"></div>
+        </div>
+    </div>
+
+    {% set hair_habits = [] %}
+    {% set nutrition_habits = [] %}
+    {% set health_habits = [] %}
+    {% for h in habits %}
+        {% if 'hair' in h.habit_name|lower or 'oil' in h.habit_name|lower or 'rosemary' in h.habit_name|lower or 'scalp' in h.habit_name|lower %}
+            {% if hair_habits.append(h) %}{% endif %}
+        {% elif 'egg' in h.habit_name|lower or 'dal' in h.habit_name|lower or 'fruit' in h.habit_name|lower or 'nut' in h.habit_name|lower %}
+            {% if nutrition_habits.append(h) %}{% endif %}
+        {% else %}
+            {% if health_habits.append(h) %}{% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {% for group_name, group_habits, color in [('Hair Care', hair_habits, '#E040FB'), ('Nutrition', nutrition_habits, '#2ECC71'), ('Health & Fitness', health_habits, '#E83A30')] %}
+    {% if group_habits %}
+    <div class="card">
+        <span class="cat-tag" style="background:{{ color }}">{{ group_name }}</span>
+        {% for h in group_habits %}
+        <div class="habit-item">
+            <form method="POST" action="/habit/toggle/{{ h.id }}" style="margin:0">
+                <button type="submit" class="habit-check {% if h.done %}done{% endif %}">{% if h.done %}&#10003;{% endif %}</button>
+            </form>
+            <span class="habit-name {% if h.done %}done-text{% endif %}">{{ h.habit_name }}</span>
+            {% if h.streak > 0 %}<span class="habit-streak">{{ h.streak }}d</span>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="card">
+        <h2>Add Custom Habit</h2>
+        <form method="POST" action="/habit/add" style="display:flex;gap:8px">
+            <input name="habit_name" placeholder="e.g., Take vitamins..." required style="flex:1">
+            <button class="btn btn-red" type="submit">Add</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

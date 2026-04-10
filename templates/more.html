@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}More — Health Tracker{% endblock %}
+{% block body %}
+<div class="topbar">
+    <a href="/" class="back">&#8249;</a>
+    <h1>More</h1>
+</div>
+<div class="container">
+    <div style="display:grid;grid-template-columns:1fr;gap:10px">
+        <a href="/pantry" class="card" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--text)">
+            <span style="font-size:2em">&#127823;</span>
+            <div><div style="font-weight:600">Pantry / Fruit Inventory</div><div style="font-size:0.82em;color:var(--text3)">Track what you buy and eat</div></div>
+        </a>
+        <a href="/expenses" class="card" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--text)">
+            <span style="font-size:2em">&#8377;</span>
+            <div><div style="font-weight:600">Expenses</div><div style="font-size:0.82em;color:var(--text3)">Track daily spending</div></div>
+        </a>
+        <a href="/kidney" class="card" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--text)">
+            <span style="font-size:2em">&#10084;</span>
+            <div><div style="font-weight:600">Health Guide</div><div style="font-size:0.82em;color:var(--text3)">Kidney, diabetes, hair, sugar-free tips</div></div>
+        </a>
+        <a href="/history" class="card" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--text)">
+            <span style="font-size:2em">&#128197;</span>
+            <div><div style="font-weight:600">History</div><div style="font-size:0.82em;color:var(--text3)">Last 30 days</div></div>
+        </a>
+        <a href="/profile" class="card" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--text)">
+            <span style="font-size:2em">&#9881;</span>
+            <div><div style="font-weight:600">Profile & Settings</div><div style="font-size:0.82em;color:var(--text3)">Weight, goals, reminders</div></div>
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>{% block title %}Health Tracker{% endblock %}</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#E83A30">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<style>
+/* ===== BAYMAX THEME ===== */
+:root {
+    --bg: #F5F5F7;
+    --surface: #FFFFFF;
+    --surface2: #EEEEF0;
+    --red: #E83A30;
+    --red-light: #FDECEA;
+    --red-dark: #C62828;
+    --green: #2ECC71;
+    --green-light: #E8F8F0;
+    --yellow: #F5A623;
+    --yellow-light: #FFF8E7;
+    --orange: #FF7043;
+    --blue: #5B9BD5;
+    --blue-light: #EBF3FB;
+    --text: #2C2C2E;
+    --text2: #636366;
+    --text3: #AEAEB2;
+    --border: #E5E5EA;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.10);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+a { color: var(--red); text-decoration: none; }
+
+/* Top bar */
+.topbar {
+    background: var(--surface);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+.topbar .back { font-size: 1.4em; color: var(--red); cursor: pointer; text-decoration: none; line-height: 1; }
+.topbar h1 { font-size: 1.15em; font-weight: 600; flex: 1; }
+.topbar .baymax-mini {
+    width: 32px; height: 32px;
+}
+
+/* Container */
+.container { max-width: 600px; margin: 0 auto; padding: 16px; }
+
+/* Cards */
+.card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+.card h2 {
+    font-size: 1.05em;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--text);
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.92em;
+    font-weight: 600;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.btn-red { background: var(--red); color: white; }
+.btn-red:hover { background: var(--red-dark); }
+.btn-outline { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
+.btn-outline:hover { background: var(--red-light); }
+.btn-green { background: var(--green); color: white; }
+.btn-sm { padding: 6px 12px; font-size: 0.82em; border-radius: 8px; }
+.btn-danger { background: transparent; color: #FF3B30; border: 1px solid #FF3B30; }
+.btn-danger:hover { background: #FF3B30; color: white; }
+.btn-ghost { background: var(--surface2); color: var(--text2); border: none; }
+
+/* Inputs */
+input, select {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 0.95em;
+    width: 100%;
+    font-family: inherit;
+}
+input:focus, select:focus { outline: none; border-color: var(--red); background: white; }
+label { font-size: 0.82em; color: var(--text2); display: block; margin-bottom: 4px; font-weight: 500; }
+
+/* Row */
+.row { display: flex; gap: 10px; align-items: end; }
+.row > * { flex: 1; }
+
+/* Progress bar */
+.progress-bar { height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; margin: 8px 0; }
+.progress-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+
+/* Flash messages */
+.flash { padding: 12px 16px; border-radius: 12px; margin-bottom: 12px; font-size: 0.9em; font-weight: 500; }
+.flash-success { background: var(--green-light); color: #1B7A41; }
+.flash-error { background: var(--red-light); color: var(--red-dark); }
+
+/* Tips */
+.tip { padding: 12px 14px; border-radius: 12px; margin: 8px 0; font-size: 0.88em; }
+.tip-good { background: var(--green-light); color: #1B7A41; }
+.tip-warning { background: var(--red-light); color: var(--red-dark); }
+.tip-caution { background: var(--yellow-light); color: #8B6914; }
+.tip-info { background: var(--blue-light); color: #2C5F8A; }
+
+/* Bottom nav */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding: 4px 0 env(safe-area-inset-bottom, 6px);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+.bottom-nav-inner { display: flex; justify-content: space-around; max-width: 600px; margin: 0 auto; }
+.bottom-nav a {
+    display: flex; flex-direction: column; align-items: center;
+    color: var(--text3); font-size: 0.62em; padding: 6px 4px;
+    text-decoration: none; transition: color .2s; font-weight: 500;
+    min-width: 48px;
+}
+.bottom-nav a.active { color: var(--red); }
+.bottom-nav a:hover { color: var(--red); }
+.nav-icon { font-size: 1.5em; line-height: 1; margin-bottom: 2px; }
+
+body { padding-bottom: 72px; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+th { text-align: left; color: var(--text2); padding: 8px; border-bottom: 2px solid var(--border); font-weight: 600; }
+td { padding: 8px; border-bottom: 1px solid var(--surface2); }
+
+/* Responsive */
+@media (max-width: 400px) {
+    .container { padding: 10px; }
+    .card { padding: 16px; border-radius: 14px; }
+}
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
+
+<!-- Mobile Bottom Navigation -->
+<nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+        <a href="/" {% if active_page=='home' %}class="active"{% endif %}>
+            <span class="nav-icon">&#9733;</span>Home</a>
+        <a href="/water" {% if active_page=='water' %}class="active"{% endif %}>
+            <span class="nav-icon">&#9737;</span>Water</a>
+        <a href="/meals" {% if active_page=='meals' %}class="active"{% endif %}>
+            <span class="nav-icon">&#9832;</span>Meals</a>
+        <a href="/habits" {% if active_page=='habits' %}class="active"{% endif %}>
+            <span class="nav-icon">&#10003;</span>Habits</a>
+        <a href="/todos" {% if active_page=='todos' %}class="active"{% endif %}>
+            <span class="nav-icon">&#9998;</span>To-Do</a>
+        <a href="/more" {% if active_page=='more' %}class="active"{% endif %}>
+            <span class="nav-icon">&#8943;</span>More</a>
+    </div>
+</nav>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
