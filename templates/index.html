@@ -88,23 +88,30 @@
 
 {% block body %}
 <div class="container">
-    <!-- GlowShine Greeting -->
-    <div class="baymax-hero glow-pulse">
-        <div style="font-size:3em;margin-bottom:8px;">✦</div>
-        <div style="font-size:1.6em;font-weight:800;background:linear-gradient(135deg,#a855f7,#f472b6,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.5px;">GlowShine</div>
-        <div style="font-size:0.78em;color:rgba(244,114,182,0.7);margin:2px 0 14px;letter-spacing:1px;">YOUR GLOW UP COMPANION</div>
-        <div class="greeting-text">Hey {{ username }} ✨</div>
-        <div class="greeting-sub">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    <!-- ── Hero ── -->
+    <div class="baymax-hero glow-pulse" style="margin-top:12px">
+        <div style="font-size:2.2em;margin-bottom:6px;">✦</div>
+        <div style="font-size:1.8em;font-weight:800;background:linear-gradient(135deg,#a855f7,#f472b6,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-1px;line-height:1.1;">GlowShine</div>
+        <div style="font-size:0.72em;color:rgba(244,114,182,0.7);margin:4px 0 16px;letter-spacing:2px;text-transform:uppercase;">your glow up companion</div>
+        <div class="greeting-text" style="font-size:1.3em;">Hey {{ username }} ✨</div>
+        <div class="greeting-sub" style="margin-top:6px;font-size:0.88em;">
             {% if s.total_water_ml < s.profile.water_goal_ml * 0.3 and s.total_cal == 0 %}
-                "I cannot deactivate until you say you are satisfied with your care."
+                Start your day strong — log water & meals 💧
             {% elif s.total_water_ml < s.profile.water_goal_ml * 0.5 %}
-                "On a scale of 1 to 10, how would you rate your hydration? Let's drink some water."
+                Drink more water — you're halfway to your goal 💧
             {% elif s.habits_done < s.habits_total // 2 %}
-                "You have completed {{ s.habits_done }} of {{ s.habits_total }} habits. Shall we work on the rest?"
+                {{ s.habits_done }} of {{ s.habits_total }} habits done — keep going! 🌟
             {% elif s.total_cal > s.profile.calorie_goal %}
-                "You are {{ "%.0f"|format(s.total_cal - s.profile.calorie_goal) }} calories over. A short walk would help."
+                Calories over — a short walk would help 🚶
             {% else %}
-                "I am satisfied with your care. You are doing well today."
+                You're doing amazing today 🌸
             {% endif %}
         </div>
 
@@ -116,144 +123,127 @@
         {% set step_score = [(step_pct * 20)|int, 20]|min %}
         {% set sodium_score = 10 if s.total_sodium <= 2000 else (5 if s.total_sodium <= 2500 else 0) %}
         {% set total_score = [water_score + cal_score + step_score + sodium_score, 100]|min %}
-        <div class="score-circle">
-            <svg width="90" height="90">
-                <circle class="bg" cx="45" cy="45" r="38"/>
-                <circle class="fg" cx="45" cy="45" r="38"
-                    stroke="{% if total_score >= 70 %}var(--green){% elif total_score >= 40 %}var(--yellow){% else %}var(--red){% endif %}"
-                    stroke-dasharray="239"
-                    stroke-dashoffset="{{ 239 - (239 * total_score / 100) }}"/>
-            </svg>
-            <div class="score-num" style="color:{% if total_score >= 70 %}var(--green){% elif total_score >= 40 %}var(--yellow){% else %}var(--red){% endif %}">{{ total_score }}</div>
-        </div>
-        <div style="font-size:0.78em;color:var(--text3)">Health Score</div>
-    </div>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for cat, msg in messages %}
-    <div class="flash flash-{{ cat }}">{{ msg }}</div>
-    {% endfor %}
-    {% endwith %}
-
-    {% if s.low_stock %}
-    <div class="tip tip-warning" style="margin-bottom:14px">
-        <b>Buy soon:</b>
-        {% for item in s.low_stock %}{{ item.item_name|capitalize }} ({{ item.quantity }} left){% if not loop.last %}, {% endif %}{% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Quick Progress -->
-    <div class="card" style="padding:16px">
-        <div class="quick-bar">
-            <div class="label"><span>Water</span><span>{{ s.total_water_ml }} / {{ s.profile.water_goal_ml }} ml</span></div>
-            <div class="bar"><div class="fill" style="width:{{ [(s.total_water_ml / s.profile.water_goal_ml * 100)|int, 100]|min }}%;background:var(--blue)"></div></div>
-        </div>
-        <div class="quick-bar">
-            <div class="label"><span>Calories</span><span>{{ "%.0f"|format(s.total_cal) }} / {{ s.profile.calorie_goal }} kcal</span></div>
-            <div class="bar"><div class="fill" style="width:{{ [(s.total_cal / s.profile.calorie_goal * 100)|int if s.profile.calorie_goal > 0 else 0, 100]|min }}%;background:{% if s.total_cal > s.profile.calorie_goal %}var(--red){% else %}var(--green){% endif %}"></div></div>
-        </div>
-        <div class="quick-bar">
-            <div class="label"><span>Steps</span><span>{{ "{:,}".format(s.steps_done) }} / {{ "{:,}".format(s.steps_recommended) }}</span></div>
-            <div class="bar"><div class="fill" style="width:{{ [(s.steps_done / s.steps_recommended * 100)|int if s.steps_recommended > 0 else 0, 100]|min }}%;background:var(--orange)"></div></div>
-        </div>
-        <div class="quick-bar">
-            <div class="label"><span>Habits</span><span>{{ s.habits_done }} / {{ s.habits_total }}</span></div>
-            <div class="bar"><div class="fill" style="width:{{ (s.habits_done / s.habits_total * 100)|int if s.habits_total > 0 else 0 }}%;background:var(--red)"></div></div>
+        <div style="margin-top:20px">
+            <div style="position:relative;width:110px;height:110px;margin:0 auto">
+                <svg width="110" height="110" style="transform:rotate(-90deg)">
+                    <circle fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8" cx="55" cy="55" r="46"/>
+                    <circle fill="none"
+                        stroke="{% if total_score >= 70 %}#4ade80{% elif total_score >= 40 %}#fbbf24{% else %}#f87171{% endif %}"
+                        stroke-width="8" stroke-linecap="round"
+                        cx="55" cy="55" r="46"
+                        stroke-dasharray="289"
+                        stroke-dashoffset="{{ 289 - (289 * total_score / 100) }}"
+                        style="filter:drop-shadow(0 0 8px {% if total_score >= 70 %}#4ade80{% elif total_score >= 40 %}#fbbf24{% else %}#f87171{% endif %})"/>
+                </svg>
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+                    <div style="font-size:1.9em;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;">{{ total_score }}</div>
+                    <div style="font-size:0.62em;color:var(--text3);margin-top:1px;">score</div>
+                </div>
+            </div>
+            <div style="font-size:0.75em;color:var(--text3);margin-top:8px;letter-spacing:0.5px;">Today's Health Score</div>
         </div>
     </div>
 
-    <!-- Menu Grid -->
+    <!-- ── 4 Key Stats ── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <a href="/water" style="text-decoration:none">
+            <div class="card card-glow" style="padding:20px;text-align:center;border-color:rgba(34,211,238,0.3)">
+                <div style="font-size:2em;margin-bottom:6px;">💧</div>
+                <div style="font-size:1.5em;font-weight:700;color:#22d3ee;">{{ s.total_water_ml }}</div>
+                <div style="font-size:0.72em;color:var(--text3);margin-top:2px;">of {{ s.profile.water_goal_ml }} ml</div>
+                <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:10px;overflow:hidden">
+                    <div style="height:100%;width:{{ [(s.total_water_ml / s.profile.water_goal_ml * 100)|int,100]|min }}%;background:#22d3ee;border-radius:2px;box-shadow:0 0 8px #22d3ee"></div>
+                </div>
+            </div>
+        </a>
+        <a href="/meals" style="text-decoration:none">
+            <div class="card card-glow" style="padding:20px;text-align:center;border-color:rgba(251,191,36,0.3)">
+                <div style="font-size:2em;margin-bottom:6px;">🍽️</div>
+                <div style="font-size:1.5em;font-weight:700;color:#fbbf24;">{{ "%.0f"|format(s.total_cal) }}</div>
+                <div style="font-size:0.72em;color:var(--text3);margin-top:2px;">of {{ s.profile.calorie_goal }} kcal</div>
+                <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:10px;overflow:hidden">
+                    <div style="height:100%;width:{{ [(s.total_cal / s.profile.calorie_goal * 100)|int if s.profile.calorie_goal > 0 else 0,100]|min }}%;background:#fbbf24;border-radius:2px;box-shadow:0 0 8px #fbbf24"></div>
+                </div>
+            </div>
+        </a>
+        <a href="/steps" style="text-decoration:none">
+            <div class="card card-glow" style="padding:20px;text-align:center;border-color:rgba(74,222,128,0.3)">
+                <div style="font-size:2em;margin-bottom:6px;">🚶</div>
+                <div style="font-size:1.5em;font-weight:700;color:#4ade80;">{{ "{:,}".format(s.steps_done) }}</div>
+                <div style="font-size:0.72em;color:var(--text3);margin-top:2px;">of {{ "{:,}".format(s.steps_recommended) }} steps</div>
+                <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:10px;overflow:hidden">
+                    <div style="height:100%;width:{{ [(s.steps_done / s.steps_recommended * 100)|int if s.steps_recommended > 0 else 0,100]|min }}%;background:#4ade80;border-radius:2px;box-shadow:0 0 8px #4ade80"></div>
+                </div>
+            </div>
+        </a>
+        <a href="/habits" style="text-decoration:none">
+            <div class="card card-glow" style="padding:20px;text-align:center;border-color:rgba(168,85,247,0.3)">
+                <div style="font-size:2em;margin-bottom:6px;">✅</div>
+                <div style="font-size:1.5em;font-weight:700;color:#a855f7;">{{ s.habits_done }}/{{ s.habits_total }}</div>
+                <div style="font-size:0.72em;color:var(--text3);margin-top:2px;">habits done</div>
+                <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:10px;overflow:hidden">
+                    <div style="height:100%;width:{{ (s.habits_done / s.habits_total * 100)|int if s.habits_total > 0 else 0 }}%;background:#a855f7;border-radius:2px;box-shadow:0 0 8px #a855f7"></div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- ── Feature Grid ── -->
+    <div style="font-size:0.75em;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:10px;padding-left:4px;">Quick Access</div>
     <div class="menu-grid">
-        <a class="menu-card" href="/water">
-            <span class="menu-icon" style="color:var(--blue)">&#128167;</span>
-            <div class="menu-label">Water</div>
-            <div class="menu-sub">{{ s.total_water_ml }} ml today</div>
-        </a>
-        <a class="menu-card" href="/meals">
-            <span class="menu-icon" style="color:var(--orange)">&#127858;</span>
-            <div class="menu-label">Meals</div>
-            <div class="menu-sub">{{ "%.0f"|format(s.total_cal) }} kcal</div>
-        </a>
-        <a class="menu-card" href="/steps">
-            <span class="menu-icon" style="color:var(--green)">&#128694;</span>
-            <div class="menu-label">Steps</div>
-            <div class="menu-sub">{{ "{:,}".format(s.steps_done) }} today</div>
-        </a>
         <a class="menu-card" href="/fasting">
-            <span class="menu-icon" style="color:var(--red)">&#9201;</span>
+            <span class="menu-icon">⏱️</span>
             <div class="menu-label">Fasting</div>
             <div class="menu-sub">16:8 timer</div>
         </a>
-        <a class="menu-card" href="/habits">
-            <span class="menu-icon" style="color:var(--red)">&#10004;</span>
-            <div class="menu-label">Habits</div>
-            <div class="menu-sub">{{ s.habits_done }}/{{ s.habits_total }} done</div>
-            {% if s.habits_total - s.habits_done > 0 %}
-            <span class="menu-badge">{{ s.habits_total - s.habits_done }}</span>
-            {% endif %}
-        </a>
         <a class="menu-card" href="/pantry">
-            <span class="menu-icon" style="color:var(--green)">&#127823;</span>
+            <span class="menu-icon">🛒</span>
             <div class="menu-label">Pantry</div>
-            <div class="menu-sub">Fruit inventory</div>
-            {% if s.low_stock %}
-            <span class="menu-badge">{{ s.low_stock|length }}</span>
-            {% endif %}
+            <div class="menu-sub">
+                {% if s.low_stock %}{{ s.low_stock|length }} low stock{% else %}All stocked{% endif %}
+            </div>
         </a>
         <a class="menu-card" href="/expenses">
-            <span class="menu-icon" style="color:var(--yellow)">&#8377;</span>
+            <span class="menu-icon">₹</span>
             <div class="menu-label">Expenses</div>
-            <div class="menu-sub">{{ "%.0f"|format(s.today_expenses) }} today</div>
+            <div class="menu-sub">₹{{ "%.0f"|format(s.today_expenses) }} today</div>
         </a>
         <a class="menu-card" href="/todos">
-            <span class="menu-icon" style="color:var(--orange)">&#128221;</span>
+            <span class="menu-icon">📝</span>
             <div class="menu-label">To-Do</div>
             <div class="menu-sub">{{ s.pending_todos }} pending</div>
-            {% if s.pending_todos > 0 %}
-            <span class="menu-badge">{{ s.pending_todos }}</span>
-            {% endif %}
+            {% if s.pending_todos > 0 %}<span class="menu-badge">{{ s.pending_todos }}</span>{% endif %}
         </a>
         <a class="menu-card" href="/kidney">
-            <span class="menu-icon" style="color:var(--red)">&#10084;</span>
+            <span class="menu-icon">❤️</span>
             <div class="menu-label">Health Guide</div>
-            <div class="menu-sub">Kidney, diabetes, hair</div>
+            <div class="menu-sub">Tips & care</div>
         </a>
         <a class="menu-card" href="/history">
-            <span class="menu-icon" style="color:var(--text3)">&#128197;</span>
+            <span class="menu-icon">📅</span>
             <div class="menu-label">History</div>
             <div class="menu-sub">30-day log</div>
         </a>
-        <a class="menu-card" href="/profile">
-            <span class="menu-icon" style="color:var(--text2)">&#9881;</span>
-            <div class="menu-label">Profile</div>
-            <div class="menu-sub">
-                {% set bmi = s.profile.weight_kg / (s.profile.height_cm / 100) ** 2 %}
-                BMI {{ "%.1f"|format(bmi) }}
-            </div>
-        </a>
     </div>
 
-    <!-- Word of the Day -->
-    <div class="wod-card">
-        <div style="display:flex;gap:14px">
-            <div style="flex:1">
-                <div class="wod-type" style="color:var(--red)">Office Word</div>
-                <div class="wod-word" style="color:var(--red)">{{ pro_word.word }}</div>
-                <div class="wod-meaning">{{ pro_word.meaning }}</div>
-                <div class="wod-example">"{{ pro_word.example }}"</div>
+    <!-- ── Word of the Day ── -->
+    <div class="wod-card" style="margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div class="wod-type" style="color:var(--purple)">✦ Word of the Day</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:rgba(168,85,247,0.08);border-radius:12px;padding:12px;border:1px solid rgba(168,85,247,0.2)">
+                <div style="font-size:0.65em;color:var(--purple);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px;">Office</div>
+                <div class="wod-word" style="color:var(--purple);font-size:1.05em">{{ pro_word.word }}</div>
+                <div class="wod-meaning" style="font-size:0.78em;margin-top:4px">{{ pro_word.meaning }}</div>
+            </div>
+            <div style="background:rgba(244,114,182,0.08);border-radius:12px;padding:12px;border:1px solid rgba(244,114,182,0.2)">
+                <div style="font-size:0.65em;color:var(--pink);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px;">Gen Z</div>
+                <div class="wod-word" style="color:var(--pink);font-size:1.05em">{{ gen_word.word }}</div>
+                <div class="wod-meaning" style="font-size:0.78em;margin-top:4px">{{ gen_word.meaning }}</div>
             </div>
         </div>
     </div>
-    <div class="wod-card">
-        <div class="wod-type" style="color:var(--orange)">Gen Z Word</div>
-        <div class="wod-word" style="color:var(--orange)">{{ gen_word.word }}</div>
-        <div class="wod-meaning">{{ gen_word.meaning }}</div>
-        <div class="wod-example">"{{ gen_word.example }}"</div>
-    </div>
 
-    <!-- Kidney tips -->
-    {% for level, msg in s.kidney_tips %}
-    <div class="tip tip-{{ level }}">{{ msg }}</div>
-    {% endfor %}
 </div>
 {% endblock %}
