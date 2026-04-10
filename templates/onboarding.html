@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Welcome to GlowShine ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: #0d0d1a;
+    color: #f1f0ff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Animated background orbs */
+.orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: float 8s ease-in-out infinite;
+    pointer-events: none;
+}
+.orb1 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(168,85,247,0.35), transparent);
+    top: -100px; left: -100px;
+    animation-delay: 0s;
+}
+.orb2 {
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(244,114,182,0.3), transparent);
+    bottom: -80px; right: -80px;
+    animation-delay: -3s;
+}
+.orb3 {
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(34,211,238,0.15), transparent);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -5s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(30px, -20px) scale(1.05); }
+    66%       { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+/* Stars */
+.stars {
+    position: fixed; inset: 0; pointer-events: none;
+    background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 35% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 65% 85%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 45%, rgba(255,255,255,0.4) 0%, transparent 100%);
+}
+
+/* Card */
+.card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(168,85,247,0.25);
+    border-radius: 28px;
+    padding: 48px 36px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 0 60px rgba(168,85,247,0.15), 0 20px 60px rgba(0,0,0,0.5);
+    animation: cardIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(40px) scale(0.9); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Logo */
+.logo {
+    font-size: 2.8em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a855f7, #f472b6, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+    animation: shimmer 3s ease-in-out infinite;
+    background-size: 200% auto;
+}
+
+@keyframes shimmer {
+    0%   { background-position: 0% center; }
+    50%  { background-position: 100% center; }
+    100% { background-position: 0% center; }
+}
+
+.sparkle { font-size: 1.8em; margin-bottom: 12px; display: block; animation: spin 4s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.tagline {
+    font-size: 0.9em;
+    color: rgba(244,114,182,0.8);
+    margin-bottom: 8px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.welcome-text {
+    font-size: 1.05em;
+    color: rgba(241,240,255,0.6);
+    margin-bottom: 36px;
+    line-height: 1.6;
+}
+
+/* Input */
+.input-wrap {
+    position: relative;
+    margin-bottom: 24px;
+}
+.input-wrap input {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(168,85,247,0.3);
+    color: #f1f0ff;
+    padding: 16px 20px;
+    border-radius: 16px;
+    font-size: 1.05em;
+    font-family: inherit;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.3s;
+    letter-spacing: 0.3px;
+}
+.input-wrap input:focus {
+    outline: none;
+    border-color: #a855f7;
+    background: rgba(168,85,247,0.08);
+    box-shadow: 0 0 0 4px rgba(168,85,247,0.12), 0 0 30px rgba(168,85,247,0.2);
+}
+.input-wrap input::placeholder { color: rgba(241,240,255,0.3); }
+
+/* Button */
+.btn-glow {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #a855f7, #f472b6);
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 1.05em;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(168,85,247,0.5);
+    letter-spacing: 0.3px;
+}
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 35px rgba(244,114,182,0.6);
+}
+.btn-glow:active { transform: translateY(0); }
+
+/* Divider dots */
+.dots { margin: 28px 0 20px; display: flex; justify-content: center; gap: 6px; }
+.dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(168,85,247,0.3);
+}
+.dot.active { background: linear-gradient(135deg, #a855f7, #f472b6); width: 20px; border-radius: 3px; }
+
+.footer-text { font-size: 0.78em; color: rgba(241,240,255,0.25); margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="card">
+    <span class="sparkle">✦</span>
+    <div class="logo">GlowShine</div>
+    <div class="tagline">your personal glow up companion</div>
+
+    <div class="dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <p class="welcome-text">
+        Track your water, meals, habits & routines.<br>
+        Let's start with your name 🌸
+    </p>
+
+    <form method="POST" action="/onboarding">
+        <div class="input-wrap">
+            <input
+                type="text"
+                name="name"
+                placeholder="What's your name?"
+                autocomplete="off"
+                autofocus
+                required
+                maxlength="30"
+            >
+        </div>
+        <button type="submit" class="btn-glow">Start Glowing ✨</button>
+    </form>
+
+    <p class="footer-text">You only need to do this once 💜</p>
+</div>
+
+</body>
+</html>

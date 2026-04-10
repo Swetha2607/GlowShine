@@ -3,48 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>{% block title %}Health Tracker{% endblock %}</title>
+<title>{% block title %}GlowShine{% endblock %}</title>
 <link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#E83A30">
+<meta name="theme-color" content="#a855f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="/static/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== BAYMAX THEME ===== */
+/* ===== GLOWSHINE THEME ===== */
 :root {
-    --bg: #F5F5F7;
-    --surface: #FFFFFF;
-    --surface2: #EEEEF0;
-    --red: #E83A30;
-    --red-light: #FDECEA;
-    --red-dark: #C62828;
-    --green: #2ECC71;
-    --green-light: #E8F8F0;
-    --yellow: #F5A623;
-    --yellow-light: #FFF8E7;
-    --orange: #FF7043;
-    --blue: #5B9BD5;
-    --blue-light: #EBF3FB;
-    --text: #2C2C2E;
-    --text2: #636366;
-    --text3: #AEAEB2;
-    --border: #E5E5EA;
-    --shadow: 0 2px 12px rgba(0,0,0,0.06);
-    --shadow-lg: 0 4px 24px rgba(0,0,0,0.10);
+    --bg:        #0d0d1a;
+    --bg2:       #12122b;
+    --surface:   rgba(255,255,255,0.05);
+    --surface2:  rgba(255,255,255,0.08);
+    --pink:      #f472b6;
+    --purple:    #a855f7;
+    --violet:    #7c3aed;
+    --cyan:      #22d3ee;
+    --green:     #4ade80;
+    --yellow:    #fbbf24;
+    --red:       #f87171;
+    --text:      #f1f0ff;
+    --text2:     #b4b0d8;
+    --text3:     #6b6894;
+    --border:    rgba(168,85,247,0.2);
+    --glow-pink: 0 0 20px rgba(244,114,182,0.4);
+    --glow-purple: 0 0 20px rgba(168,85,247,0.4);
+    --shadow:    0 4px 24px rgba(0,0,0,0.4);
+    --grad:      linear-gradient(135deg, #a855f7, #f472b6);
+    --grad2:     linear-gradient(135deg, #7c3aed, #a855f7);
 }
+
 * { margin:0; padding:0; box-sizing:border-box; }
+
 body {
-    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Outfit', -apple-system, system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(168,85,247,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(244,114,182,0.1) 0%, transparent 50%);
 }
-a { color: var(--red); text-decoration: none; }
 
-/* Top bar */
+a { color: var(--pink); text-decoration: none; }
+
+/* ── Top bar ── */
 .topbar {
-    background: var(--surface);
+    background: rgba(13,13,26,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 14px 20px;
     display: flex;
     align-items: center;
@@ -54,58 +64,152 @@ a { color: var(--red); text-decoration: none; }
     top: 0;
     z-index: 50;
 }
-.topbar .back { font-size: 1.4em; color: var(--red); cursor: pointer; text-decoration: none; line-height: 1; }
-.topbar h1 { font-size: 1.15em; font-weight: 600; flex: 1; }
-.topbar .baymax-mini {
-    width: 32px; height: 32px;
+.topbar .back {
+    font-size: 1.4em;
+    color: var(--purple);
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1;
+}
+.topbar h1 {
+    font-size: 1.1em;
+    font-weight: 600;
+    flex: 1;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-/* Container */
+/* ── Logo bar for home ── */
+.brand {
+    text-align: center;
+    padding: 24px 20px 8px;
+}
+.brand-name {
+    font-size: 2em;
+    font-weight: 700;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+.brand-sub {
+    font-size: 0.85em;
+    color: var(--text3);
+    margin-top: 2px;
+}
+
+/* ── Container ── */
 .container { max-width: 600px; margin: 0 auto; padding: 16px; }
 
-/* Cards */
+/* ── Cards ── */
 .card {
     background: var(--surface);
-    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
     padding: 20px;
     margin-bottom: 14px;
-    box-shadow: var(--shadow);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.card:hover {
+    border-color: rgba(168,85,247,0.4);
+    box-shadow: var(--glow-purple), var(--shadow);
 }
 .card h2 {
-    font-size: 1.05em;
+    font-size: 1em;
     font-weight: 600;
     margin-bottom: 14px;
-    color: var(--text);
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* Buttons */
+/* Glow card variant */
+.card-glow {
+    background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(244,114,182,0.08));
+    border-color: rgba(168,85,247,0.3);
+}
+
+/* ── Stat tiles ── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-tile {
+    background: var(--surface2);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    text-align: center;
+}
+.stat-tile .val {
+    font-size: 1.8em;
+    font-weight: 700;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+}
+.stat-tile .lbl { font-size: 0.75em; color: var(--text3); margin-top: 4px; }
+
+/* ── Buttons ── */
 .btn {
-    padding: 10px 20px;
+    padding: 11px 22px;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     font-size: 0.92em;
     font-weight: 600;
-    transition: all .2s;
+    font-family: inherit;
+    transition: all .25s;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
 }
-.btn-red { background: var(--red); color: white; }
-.btn-red:hover { background: var(--red-dark); }
-.btn-outline { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
-.btn-outline:hover { background: var(--red-light); }
-.btn-green { background: var(--green); color: white; }
-.btn-sm { padding: 6px 12px; font-size: 0.82em; border-radius: 8px; }
-.btn-danger { background: transparent; color: #FF3B30; border: 1px solid #FF3B30; }
-.btn-danger:hover { background: #FF3B30; color: white; }
-.btn-ghost { background: var(--surface2); color: var(--text2); border: none; }
-
-/* Inputs */
-input, select {
+.btn-red, .btn-primary {
+    background: var(--grad);
+    color: white;
+    box-shadow: 0 4px 15px rgba(168,85,247,0.4);
+}
+.btn-red:hover, .btn-primary:hover {
+    box-shadow: 0 6px 25px rgba(244,114,182,0.6);
+    transform: translateY(-1px);
+}
+.btn-outline {
+    background: transparent;
+    color: var(--purple);
+    border: 1.5px solid var(--purple);
+}
+.btn-outline:hover {
+    background: rgba(168,85,247,0.1);
+    box-shadow: var(--glow-purple);
+}
+.btn-green {
+    background: linear-gradient(135deg, #4ade80, #22d3ee);
+    color: #0d0d1a;
+    font-weight: 700;
+}
+.btn-sm { padding: 7px 14px; font-size: 0.82em; border-radius: 10px; }
+.btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+}
+.btn-danger:hover { background: rgba(248,113,113,0.15); }
+.btn-ghost {
     background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+}
+
+/* ── Inputs ── */
+input, select, textarea {
+    background: rgba(255,255,255,0.06);
     border: 1.5px solid var(--border);
     color: var(--text);
     padding: 12px 14px;
@@ -113,62 +217,121 @@ input, select {
     font-size: 0.95em;
     width: 100%;
     font-family: inherit;
+    transition: border-color .2s, box-shadow .2s;
 }
-input:focus, select:focus { outline: none; border-color: var(--red); background: white; }
-label { font-size: 0.82em; color: var(--text2); display: block; margin-bottom: 4px; font-weight: 500; }
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(168,85,247,0.15);
+    background: rgba(168,85,247,0.05);
+}
+input::placeholder { color: var(--text3); }
+select option { background: #1a1a35; color: var(--text); }
+label {
+    font-size: 0.82em;
+    color: var(--text2);
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
 
-/* Row */
+/* ── Row ── */
 .row { display: flex; gap: 10px; align-items: end; }
 .row > * { flex: 1; }
 
-/* Progress bar */
-.progress-bar { height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; margin: 8px 0; }
-.progress-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+/* ── Progress bar ── */
+.progress-bar {
+    height: 10px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+.progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: var(--grad);
+    transition: width 0.6s ease;
+    box-shadow: 0 0 10px rgba(168,85,247,0.5);
+}
 
-/* Flash messages */
+/* ── Flash messages ── */
 .flash { padding: 12px 16px; border-radius: 12px; margin-bottom: 12px; font-size: 0.9em; font-weight: 500; }
-.flash-success { background: var(--green-light); color: #1B7A41; }
-.flash-error { background: var(--red-light); color: var(--red-dark); }
+.flash-success { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+.flash-error   { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
 
-/* Tips */
+/* ── Tips ── */
 .tip { padding: 12px 14px; border-radius: 12px; margin: 8px 0; font-size: 0.88em; }
-.tip-good { background: var(--green-light); color: #1B7A41; }
-.tip-warning { background: var(--red-light); color: var(--red-dark); }
-.tip-caution { background: var(--yellow-light); color: #8B6914; }
-.tip-info { background: var(--blue-light); color: #2C5F8A; }
+.tip-good    { background: rgba(74,222,128,0.12); color: #4ade80; border-left: 3px solid #4ade80; }
+.tip-warning { background: rgba(248,113,113,0.12); color: var(--red); border-left: 3px solid var(--red); }
+.tip-caution { background: rgba(251,191,36,0.12); color: var(--yellow); border-left: 3px solid var(--yellow); }
+.tip-info    { background: rgba(34,211,238,0.12); color: var(--cyan); border-left: 3px solid var(--cyan); }
 
-/* Bottom nav */
+/* ── Bottom nav ── */
 .bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface);
+    background: rgba(13,13,26,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--border);
     z-index: 100;
     padding: 4px 0 env(safe-area-inset-bottom, 6px);
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
-.bottom-nav-inner { display: flex; justify-content: space-around; max-width: 600px; margin: 0 auto; }
+.bottom-nav-inner {
+    display: flex;
+    justify-content: space-around;
+    max-width: 600px;
+    margin: 0 auto;
+}
 .bottom-nav a {
     display: flex; flex-direction: column; align-items: center;
-    color: var(--text3); font-size: 0.62em; padding: 6px 4px;
-    text-decoration: none; transition: color .2s; font-weight: 500;
-    min-width: 48px;
+    color: var(--text3); font-size: 0.6em; padding: 6px 4px;
+    text-decoration: none; transition: all .2s; font-weight: 500;
+    min-width: 48px; border-radius: 10px;
 }
-.bottom-nav a.active { color: var(--red); }
-.bottom-nav a:hover { color: var(--red); }
+.bottom-nav a.active { color: var(--pink); }
+.bottom-nav a.active .nav-icon { filter: drop-shadow(0 0 6px rgba(244,114,182,0.8)); }
+.bottom-nav a:hover { color: var(--purple); }
 .nav-icon { font-size: 1.5em; line-height: 1; margin-bottom: 2px; }
 
 body { padding-bottom: 72px; }
 
-/* Tables */
+/* ── Tables ── */
 table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
-th { text-align: left; color: var(--text2); padding: 8px; border-bottom: 2px solid var(--border); font-weight: 600; }
-td { padding: 8px; border-bottom: 1px solid var(--surface2); }
+th {
+    text-align: left; color: var(--text3);
+    padding: 8px; border-bottom: 1px solid var(--border);
+    font-weight: 600; font-size: 0.82em; text-transform: uppercase; letter-spacing: 0.5px;
+}
+td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text2); }
+tr:last-child td { border-bottom: none; }
 
-/* Responsive */
+/* ── Badge / pill ── */
+.badge {
+    display: inline-block; padding: 3px 10px; border-radius: 99px;
+    font-size: 0.75em; font-weight: 600;
+}
+.badge-purple { background: rgba(168,85,247,0.2); color: var(--purple); }
+.badge-pink   { background: rgba(244,114,182,0.2); color: var(--pink); }
+.badge-green  { background: rgba(74,222,128,0.2); color: var(--green); }
+.badge-yellow { background: rgba(251,191,36,0.2); color: var(--yellow); }
+
+/* ── Divider ── */
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+/* ── Responsive ── */
 @media (max-width: 400px) {
     .container { padding: 10px; }
-    .card { padding: 16px; border-radius: 14px; }
+    .card { padding: 16px; border-radius: 16px; }
+    .brand-name { font-size: 1.6em; }
 }
+
+/* ── Glow pulse animation ── */
+@keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(168,85,247,0.3); }
+    50%       { box-shadow: 0 0 25px rgba(244,114,182,0.5); }
+}
+.glow-pulse { animation: glowPulse 2.5s ease-in-out infinite; }
 </style>
 {% block extra_css %}{% endblock %}
 </head>
@@ -179,17 +342,17 @@ td { padding: 8px; border-bottom: 1px solid var(--surface2); }
 <nav class="bottom-nav">
     <div class="bottom-nav-inner">
         <a href="/" {% if active_page=='home' %}class="active"{% endif %}>
-            <span class="nav-icon">&#9733;</span>Home</a>
+            <span class="nav-icon">✦</span>Home</a>
         <a href="/water" {% if active_page=='water' %}class="active"{% endif %}>
-            <span class="nav-icon">&#9737;</span>Water</a>
+            <span class="nav-icon">💧</span>Water</a>
         <a href="/meals" {% if active_page=='meals' %}class="active"{% endif %}>
-            <span class="nav-icon">&#9832;</span>Meals</a>
+            <span class="nav-icon">🍽️</span>Meals</a>
         <a href="/habits" {% if active_page=='habits' %}class="active"{% endif %}>
-            <span class="nav-icon">&#10003;</span>Habits</a>
+            <span class="nav-icon">✅</span>Habits</a>
         <a href="/todos" {% if active_page=='todos' %}class="active"{% endif %}>
-            <span class="nav-icon">&#9998;</span>To-Do</a>
+            <span class="nav-icon">📝</span>To-Do</a>
         <a href="/more" {% if active_page=='more' %}class="active"{% endif %}>
-            <span class="nav-icon">&#8943;</span>More</a>
+            <span class="nav-icon">⋯</span>More</a>
     </div>
 </nav>
 

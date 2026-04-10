@@ -1,60 +1,68 @@
 {% extends "base.html" %}
-{% block title %}Health Tracker{% endblock %}
+{% block title %}GlowShine{% endblock %}
 
 {% block extra_css %}
 <style>
-/* Baymax greeting */
+/* Hero */
 .baymax-hero {
-    background: var(--surface);
-    border-radius: 20px;
-    padding: 24px 20px;
+    background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(244,114,182,0.1));
+    border-radius: 24px;
+    padding: 28px 20px;
     margin-bottom: 16px;
     text-align: center;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(168,85,247,0.3);
     position: relative;
     overflow: hidden;
+}
+.baymax-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(244,114,182,0.2), transparent);
+    border-radius: 50%;
 }
 .baymax-hero::after {
     content: '';
     position: absolute;
-    bottom: -30px;
-    right: -30px;
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle, var(--red-light), transparent);
+    bottom: -40px; left: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(168,85,247,0.2), transparent);
     border-radius: 50%;
 }
 .baymax-svg-big { margin: 0 auto 12px; }
-.greeting-text { font-size: 1.15em; font-weight: 600; color: var(--text); }
+.greeting-text { font-size: 1.25em; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .greeting-sub { font-size: 0.85em; color: var(--text2); margin-top: 6px; line-height: 1.5; }
 
 /* Health score circle */
 .score-circle { position: relative; width: 90px; height: 90px; margin: 10px auto; }
 .score-circle svg { transform: rotate(-90deg); }
 .score-circle circle { fill: none; stroke-width: 6; }
-.score-circle .bg { stroke: var(--surface2); }
-.score-circle .fg { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
-.score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.6em; font-weight: 700; }
+.score-circle .bg { stroke: rgba(255,255,255,0.08); }
+.score-circle .fg { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; stroke: url(#scoreGrad); }
+.score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.6em; font-weight: 700; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
 /* Menu grid */
 .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
 .menu-card {
     background: var(--surface);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 18px 14px;
     text-align: center;
-    box-shadow: var(--shadow);
     border: 1px solid var(--border);
     text-decoration: none;
     color: var(--text);
-    transition: all .2s;
+    transition: all .25s;
     position: relative;
     overflow: hidden;
 }
-.menu-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.menu-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(168,85,247,0.5);
+    box-shadow: 0 8px 30px rgba(168,85,247,0.2);
+}
 .menu-icon { font-size: 2em; margin-bottom: 6px; display: block; }
-.menu-label { font-size: 0.88em; font-weight: 600; }
+.menu-label { font-size: 0.88em; font-weight: 600; color: var(--text); }
 .menu-sub { font-size: 0.72em; color: var(--text3); margin-top: 3px; }
 .menu-badge {
     position: absolute; top: 8px; right: 8px;
@@ -80,22 +88,12 @@
 
 {% block body %}
 <div class="container">
-    <!-- Baymax Greeting -->
-    <div class="baymax-hero">
-        <svg class="baymax-svg-big" width="80" height="80" viewBox="0 0 100 100">
-            <ellipse cx="50" cy="62" rx="28" ry="32" fill="white" stroke="#E5E5EA" stroke-width="1"/>
-            <ellipse cx="50" cy="28" rx="20" ry="15" fill="white" stroke="#E5E5EA" stroke-width="1"/>
-            <circle cx="43" cy="27" r="2.5" fill="#2C2C2E"/>
-            <circle cx="57" cy="27" r="2.5" fill="#2C2C2E"/>
-            <line x1="45.5" y1="27" x2="54.5" y2="27" stroke="#2C2C2E" stroke-width="1.2"/>
-            <ellipse cx="24" cy="56" rx="7" ry="13" fill="white" stroke="#E5E5EA" stroke-width="1" transform="rotate(12,24,56)"/>
-            <ellipse cx="76" cy="56" rx="7" ry="13" fill="white" stroke="#E5E5EA" stroke-width="1" transform="rotate(-12,76,56)"/>
-            <!-- Red health chip on chest -->
-            <rect x="42" y="48" width="16" height="10" rx="3" fill="#E83A30" opacity="0.9"/>
-            <line x1="46" y1="53" x2="54" y2="53" stroke="white" stroke-width="1"/>
-            <line x1="50" y1="50" x2="50" y2="56" stroke="white" stroke-width="1"/>
-        </svg>
-        <div class="greeting-text">Hello. I am Baymax, your health companion.</div>
+    <!-- GlowShine Greeting -->
+    <div class="baymax-hero glow-pulse">
+        <div style="font-size:3em;margin-bottom:8px;">✦</div>
+        <div style="font-size:1.6em;font-weight:800;background:linear-gradient(135deg,#a855f7,#f472b6,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.5px;">GlowShine</div>
+        <div style="font-size:0.78em;color:rgba(244,114,182,0.7);margin:2px 0 14px;letter-spacing:1px;">YOUR GLOW UP COMPANION</div>
+        <div class="greeting-text">Hey {{ username }} ✨</div>
         <div class="greeting-sub">
             {% if s.total_water_ml < s.profile.water_goal_ml * 0.3 and s.total_cal == 0 %}
                 "I cannot deactivate until you say you are satisfied with your care."

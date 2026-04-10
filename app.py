@@ -96,10 +96,11 @@ def init_db():
     )""")
     conn.execute("""CREATE TABLE IF NOT EXISTS user_profile (
         id              INTEGER PRIMARY KEY CHECK (id = 1),
+        name            TEXT NOT NULL DEFAULT '',
         weight_kg       REAL NOT NULL DEFAULT 70,
         height_cm       REAL NOT NULL DEFAULT 170,
         age             INTEGER NOT NULL DEFAULT 30,
-        gender          TEXT NOT NULL DEFAULT 'male',
+        gender          TEXT NOT NULL DEFAULT 'female',
         activity_level  TEXT NOT NULL DEFAULT 'moderate',
         kidney_concern  INTEGER NOT NULL DEFAULT 1,
         water_goal_ml   INTEGER NOT NULL DEFAULT 2500,
@@ -111,9 +112,15 @@ def init_db():
     cur = conn.execute("SELECT COUNT(*) FROM user_profile")
     if cur.fetchone()[0] == 0:
         conn.execute("""INSERT INTO user_profile
-            (id, weight_kg, height_cm, age, gender, activity_level,
+            (id, name, weight_kg, height_cm, age, gender, activity_level,
              kidney_concern, water_goal_ml, calorie_goal, water_reminder_min)
-            VALUES (1, 70, 170, 30, 'male', 'moderate', 1, 2500, 2000, 60)""")
+            VALUES (1, '', 70, 170, 25, 'female', 'moderate', 1, 2500, 2000, 60)""")
+    else:
+        # Add name column if upgrading from old schema
+        try:
+            conn.execute("ALTER TABLE user_profile ADD COLUMN name TEXT NOT NULL DEFAULT ''")
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
@@ -765,9 +772,26 @@ def add_habit():
 # Habits in daily summary (for index page)
 # ---------------------------------------------------------------------------
 
+@app.route("/onboarding", methods=["GET", "POST"])
+def onboarding():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        if name:
+            conn = get_db()
+            conn.execute("UPDATE user_profile SET name=? WHERE id=1", (name,))
+            conn.commit()
+            conn.close()
+        return redirect(url_for("index"))
+    return render_template("onboarding.html")
+
+
 @app.route("/")
 def index():
     conn = get_db()
+    profile = conn.execute("SELECT * FROM user_profile WHERE id=1").fetchone()
+    if not profile or not profile["name"]:
+        conn.close()
+        return redirect(url_for("onboarding"))
     today = get_today_str()
     summary = get_daily_summary(conn, today)
 
@@ -801,7 +825,7 @@ def index():
     pro_word, gen_word = get_words_of_the_day()
     return render_template("index.html", s=summary, foods=sorted(FOOD_DB.keys()),
                            today=today, pro_word=pro_word, gen_word=gen_word,
-                           active_page="home")
+                           active_page="home", username=profile["name"])
 
 
 # ---------------------------------------------------------------------------
